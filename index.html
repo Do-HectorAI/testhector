@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hector AI — L’IA du contentieux pour avocats</title>
+<meta name="description" content="Analysez vos dossiers et rédigez conclusions, assignations et mémoires dans Word avec l’IA française conçue pour les avocats contentieux." />
+<!-- Maquette de travail : ne doit jamais être indexée par les moteurs de recherche.
+     À RETIRER si cette page devait un jour devenir publique pour de bon. -->
+<meta name="robots" content="noindex, nofollow" />
+<meta name="googlebot" content="noindex, nofollow" />
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+<link rel="preload" href="assets/fonts/cabinet-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="assets/fonts/satoshi-500.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+
+<!-- ===================== Sprite d’icônes (fausse interface + page) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
+  <symbol id="i-pencil-square" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.6-4.6"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4"/><path d="M12 17.4h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M6 7l-3.2 6.5h6.4zM18 7l3.2 6.5h-6.4z"/><path d="M4 7h16"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5"/><path d="M12 16.4h.01"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7" r="3.4"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.8"/><path d="M16.5 3.7a4 4 0 0 1 0 7.1"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="M21 11.5 12.4 20a5 5 0 0 1-7.1-7.1l8.6-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.5a1.7 1.7 0 0 1-2.4-2.4l7.9-7.8"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2v1"/><path d="m3 9.5 2.2 8.2a2 2 0 0 0 1.9 1.3h11.4a2 2 0 0 0 1.9-1.4L22.5 11H6.4a2 2 0 0 0-1.9 1.4"/></symbol>
+  <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="m3 21 12-12"/><path d="m14 6 4 4"/><path d="M18 3.5 18.7 5.3 20.5 6 18.7 6.7 18 8.5 17.3 6.7 15.5 6 17.3 5.3z"/><path d="M6.5 3 7 4.4 8.4 5 7 5.6 6.5 7 6 5.6 4.6 5 6 4.4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M3 17.2 16.8 3.4a2.3 2.3 0 0 1 3.3 3.3L6.3 20.5 2.5 21.5z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5"/><path d="M12 7.6h.01"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 3v18M4 18l3 3 3-3"/><path d="M17 21V3M14 6l3-3 3 3"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4M6 10l6-6 6 6"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 21v-4h6v4"/><path d="M8.5 7.5h.01M12 7.5h.01M15.5 7.5h.01M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></symbol>
+  <symbol id="i-feather" viewBox="0 0 24 24"><path d="M20.2 3.8a5.5 5.5 0 0 0-7.8 0l-8 8V20h8.2l8-8a5.5 5.5 0 0 0-.4-8.2z"/><path d="M16 8 4 20"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H4l2-3.3A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><circle cx="8" cy="12" r="2.2"/><path d="M13.5 10h5M13.5 14h5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m8 12 2.8 2.8L16 9.4"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3 7h12M18 7h3M3 17h5M11 17h10"/><circle cx="16.5" cy="7" r="2"/><circle cx="9.5" cy="17" r="2"/></symbol>
+  <symbol id="i-canvas" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/><path d="m10 9-2.5 3L10 15"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <!-- Icône PDF (seule couleur tolérée dans la fausse interface, cf. captures) -->
+  <symbol id="i-pdf" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm0 1.8L18.2 8H15a1 1 0 0 1-1-1z"/><path fill="#fff" stroke="none" d="M6.6 13h10.8v5.4H6.6z"/><text x="12" y="17.6" fill="currentColor" stroke="none" font-family="Helvetica,Arial,sans-serif" font-size="4.6" font-weight="700" text-anchor="middle">PDF</text></symbol>
+</svg>
+
+<!-- ===================== En-tête (repris du site actuel) ===================== -->
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="https://www.hector.legal/index.html" aria-label="Accueil Hector AI">
+      <img src="assets/logo.svg" alt="Hector AI" width="240" height="50" />
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+      <ul class="nav-links">
+        <li><a href="https://www.hector.legal/comment-ca-marche.html">Comment ça marche ?</a></li>
+        <li><a href="https://www.hector.legal/faq.html">FAQ</a></li>
+        <li><a href="https://www.hector.legal/contact.html">Contact</a></li>
+      </ul>
+      <a class="btn btn-ghost" href="https://www.app.hector.legal/auth">Se connecter</a>
+      <a class="btn btn-invert" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
+    </nav>
+
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-controls="main-nav" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <!-- ===================== Hero ===================== -->
+  <section class="hero">
+    <!-- Fond vidéo : désaturé, flouté et assombri pour ne pas concurrencer
+         la fausse interface. Réglages en haut de la section 6 de style.css. -->
+    <div class="hero-media" aria-hidden="true">
+      <video id="hero-video" src="assets/media/hero.mp4" poster="assets/img/hero-poster.jpg"
+             autoplay muted loop playsinline preload="auto"></video>
+    </div>
+
+    <div class="hero__content">
+      <h1 class="hero__title">L’IA des avocats contentieux</h1>
+      <p class="hero__subtitle">Avec Hector, vous traitez vos procédures plus vite&nbsp;: de l’analyse du dossier au dernier jeu de conclusions.</p>
+    </div>
+
+    <!-- ---------- Fausse interface (maquette, aucune donnée réelle) ---------- -->
+    <div class="app-wrap">
+      <p class="app-hint" id="app-hint">Interface de démonstration — cliquez pour l’explorer.</p>
+
+      <!-- Navigation simplifiée, mobile uniquement -->
+      <div class="app-mobile-nav" role="tablist" aria-label="Écrans de la démonstration">
+        <button type="button" role="tab" data-goto="dossiers" aria-selected="true">Dossiers</button>
+        <button type="button" role="tab" data-goto="dossier" aria-selected="false">Dossier Techinov</button>
+        <button type="button" role="tab" data-goto="conversation" aria-selected="false">Nouvelle conversation</button>
+      </div>
+
+      <div class="app" id="app" data-screen="dossiers" aria-label="Démonstration de l’application Hector">
+
+        <!-- ---------- Barre latérale ---------- -->
+        <aside class="app-sidebar">
+          <div class="side-top">
+            <img class="side-wordmark" src="assets/img/hector-wordmark.webp" alt="Hector" />
+            <button type="button" class="icon-btn" aria-label="Replier le panneau" tabindex="-1"><svg class="i"><use href="#i-panel"/></svg></button>
+          </div>
+
+          <nav class="side-nav" aria-label="Navigation de l’application">
+            <button type="button" class="side-item" data-goto="conversation">
+              <svg class="i"><use href="#i-pencil-square"/></svg><span>Nouvelle conversation</span>
+            </button>
+            <button type="button" class="side-item" data-goto="dossiers" id="side-dossiers">
+              <svg class="i"><use href="#i-home"/></svg><span>Dossiers</span>
+            </button>
+          </nav>
+
+          <p class="side-label" id="side-label">Mes conversations</p>
+
+          <div class="side-search">
+            <button type="button" class="side-item side-item--plain" tabindex="-1">
+              <svg class="i"><use href="#i-search"/></svg><span>Rechercher</span>
+            </button>
+            <button type="button" class="icon-btn" aria-label="Filtrer les conversations" tabindex="-1"><svg class="i"><use href="#i-filter"/></svg></button>
+          </div>
+
+          <div class="side-convs">
+            <div class="side-conv" id="side-conv">
+              <div class="side-conv__row">
+                <span class="side-conv__title">Assignation référé dossier …</span>
+                <svg class="i side-conv__pin"><use href="#i-feather"/></svg>
+              </div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>Techinov</span>
+            </div>
+          </div>
+
+          <div class="side-bottom">
+            <button type="button" class="side-item side-item--plain" tabindex="-1">
+              <svg class="i"><use href="#i-help"/></svg><span>Aide</span>
+            </button>
+            <div class="side-user">
+              <span class="side-avatar" aria-hidden="true">D</span>
+              <span class="side-user__text"><strong>ll</strong><small>Administrateur</small></span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ---------- Zone principale ---------- -->
+        <div class="app-main">
+
+          <!-- ============ Écran A — Dossiers ============ -->
+          <section class="screen screen--dossiers" data-name="dossiers" aria-label="Dossiers">
+            <div class="pane">
+              <div class="pane-head">
+                <div>
+                  <h2 class="pane-title">Dossiers</h2>
+                  <p class="pane-sub">Gérez et suivez vos dossiers juridiques</p>
+                </div>
+                <button type="button" class="ui-btn ui-btn--dark"><svg class="i"><use href="#i-plus"/></svg>Nouveau dossier</button>
+              </div>
+
+              <div class="ui-tabs">
+                <button type="button" class="ui-tab is-active">Dossiers en cours <span class="ui-count">1</span></button>
+                <button type="button" class="ui-tab">Dossiers archivés <span class="ui-count">0</span></button>
+              </div>
+
+              <div class="pane-toolbar">
+                <span class="ui-input ui-input--grow">
+                  <svg class="i"><use href="#i-search"/></svg>
+                  <input type="text" placeholder="Rechercher des dossiers…" aria-label="Rechercher des dossiers" />
+                </span>
+                <button type="button" class="ui-btn"><svg class="i"><use href="#i-filter"/></svg>Filtrer</button>
+              </div>
+
+              <div class="table" role="table" aria-label="Dossiers en cours">
+                <div class="table-head" role="row">
+                  <span role="columnheader">Dossier</span>
+                  <span role="columnheader">Procédure</span>
+                  <span role="columnheader">Échéance</span>
+                  <span role="columnheader" class="ctr">Priorité</span>
+                  <span role="columnheader" class="ctr">Partagé à</span>
+                  <span role="columnheader">Créé le</span>
+                  <span role="columnheader"><span class="sr-only">Actions</span></span>
+                </div>
+
+                <button type="button" class="table-row is-pulsing" id="row-techinov" data-goto="dossier" role="row" aria-label="Ouvrir le dossier Techinov">
+                  <span class="cell-name" role="cell">Techinov</span>
+                  <span role="cell"><span class="ui-pill"><svg class="i"><use href="#i-scale"/></svg>Droit Commercial</span></span>
+                  <span role="cell"></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-alert"/></svg></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-users"/></svg></span>
+                  <span role="cell" class="cell-date">24 août</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-dots"/></svg></span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ Écran B — Détail du dossier ============ -->
+          <section class="screen screen--dossier" data-name="dossier" aria-label="Dossier Techinov" hidden>
+            <div class="pane">
+              <div class="pane-topbar">
+                <p class="crumbs">
+                  <button type="button" class="crumb-link" data-goto="dossiers">Dossiers</button>
+                  <span class="crumb-sep">/</span>
+                  <strong>Techinov</strong>
+                </p>
+                <div class="meta">
+                  <span class="meta-item"><em>Client</em><strong>Techinov</strong></span>
+                  <span class="meta-item"><em>Procédure</em><strong>Droit Commercial</strong></span>
+                  <span class="meta-item"><em>Statut</em><svg class="i i-muted"><use href="#i-info"/></svg><strong>En cours</strong></span>
+                  <button type="button" class="meta-btn"><svg class="i"><use href="#i-pencil"/></svg>Modifier</button>
+                  <button type="button" class="icon-btn" aria-label="Plus d’actions" tabindex="-1"><svg class="i"><use href="#i-dots"/></svg></button>
+                </div>
+              </div>
+
+              <div class="pane-row">
+                <div class="segmented">
+                  <button type="button" class="seg is-active"><svg class="i"><use href="#i-folder-open"/></svg>Gestion des pièces</button>
+                  <button type="button" class="seg"><svg class="i"><use href="#i-grid"/></svg>Analyse avancée</button>
+                </div>
+                <button type="button" class="ui-btn"><svg class="i"><use href="#i-wand"/></svg>Demander à Hector</button>
+              </div>
+
+              <div class="ui-tabs ui-tabs--wide">
+                <button type="button" class="ui-tab is-active">Nos pièces</button>
+                <button type="button" class="ui-tab">Procédure</button>
+                <button type="button" class="ui-tab">Notes client</button>
+                <button type="button" class="ui-tab">Mes écritures</button>
+                <button type="button" class="ui-tab">Partie adverse</button>
+                <button type="button" class="ui-tab">Mes recherches juridiques</button>
+                <button type="button" class="ui-tab">Chronologie</button>
+              </div>
+
+              <div class="pane-toolbar">
+                <span class="ui-input ui-input--grow">
+                  <svg class="i"><use href="#i-search"/></svg>
+                  <input type="text" placeholder="Rechercher…" aria-label="Rechercher une pièce" />
+                </span>
+                <button type="button" class="ui-btn ui-btn--plain"><svg class="i"><use href="#i-hash"/></svg>Numéroter mes pièces<svg class="i i-chev"><use href="#i-chevron-down"/></svg></button>
+                <button type="button" class="ui-btn ui-btn--plain"><svg class="i"><use href="#i-copy"/></svg>Tamponner mes pièces</button>
+                <button type="button" class="ui-btn ui-btn--plain"><svg class="i"><use href="#i-folder-plus"/></svg>Nouveau dossier</button>
+                <button type="button" class="ui-btn ui-btn--dark"><svg class="i"><use href="#i-upload"/></svg>Ajouter des pièces</button>
+              </div>
+
+              <p class="pane-help">Les pièces que vous versez au débat pour votre client — celles qui figureront au bordereau de communication.</p>
+
+              <div class="files-bar">
+                <span class="files-bar__left"><strong>Fichiers</strong> <span>- Sélectionner tous les fichiers</span></span>
+                <span class="files-bar__right"><svg class="i"><use href="#i-sort"/></svg>Trier par <strong>N° pièce</strong> <svg class="i"><use href="#i-arrow-up"/></svg></span>
+              </div>
+
+              <div class="pieces" id="pieces"><!-- injecté par script.js --></div>
+            </div>
+          </section>
+
+          <!-- ============ Écran C — Nouvelle conversation ============ -->
+          <section class="screen screen--conversation" data-name="conversation" aria-label="Nouvelle conversation" hidden>
+            <div class="pane pane--flush">
+              <div class="canvas-row">
+                <button type="button" class="ui-btn ui-btn--round"><svg class="i"><use href="#i-canvas"/></svg>Canvas</button>
+              </div>
+
+              <div class="ask">
+                <img class="ask-wordmark" src="assets/img/hector-wordmark.webp" alt="Hector" />
+                <h2 class="ask-title">Comment puis-je vous aider ?</h2>
+                <p class="ask-suggestion" id="ask-suggestion">Synthétiser les faits du dossier</p>
+
+                <button type="button" class="ui-btn ui-btn--round ask-picker"><svg class="i"><use href="#i-folder"/></svg>Sélectionner un dossier<svg class="i i-chev"><use href="#i-chevron-down"/></svg></button>
+
+                <div class="composer">
+                  <input type="text" class="composer-input" placeholder="Décrivez ce que vous voulez faire …" aria-label="Décrivez ce que vous voulez faire" />
+                  <div class="composer-actions">
+                    <button type="button" class="icon-btn" aria-label="Joindre un fichier" tabindex="-1"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                    <button type="button" class="icon-btn" aria-label="Dicter" tabindex="-1"><svg class="i"><use href="#i-mic"/></svg></button>
+                  </div>
+                </div>
+
+                <div class="quick-head">
+                  <span class="quick-label">Actions rapides</span>
+                  <button type="button" class="quick-manage"><svg class="i"><use href="#i-sliders"/></svg>Gérer</button>
+                </div>
+                <div class="quick-grid" id="quick-grid"><!-- injecté par script.js --></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Éléments flottants, présents sur les trois écrans -->
+          <button type="button" class="float-side" aria-label="Ouvrir la fiche" tabindex="-1"><svg class="i"><use href="#i-card"/></svg></button>
+          <button type="button" class="float-chat" aria-label="Ouvrir le chat" tabindex="-1"><svg class="i"><use href="#i-chat"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Boutons, sous la fausse interface ---------- -->
+    <div class="hero__actions">
+      <a class="btn btn-invert" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
+      <a class="btn btn-link" href="https://www.hector.legal/comment-ca-marche.html">Voir comment ça marche en détail <svg class="i"><use href="#i-arrow-right"/></svg></a>
+    </div>
+  </section>
+
+  <!-- ===================== Chiffres ===================== -->
+  <section class="section stats-section" aria-label="Chiffres clés">
+    <div class="container">
+      <div class="stats-grid" id="stats">
+        <!-- TODO à trancher : valeurs reprises de la section « chiffres » de hector.legal
+             le 25/08/2026 (12 h / 344 / 270 000). Le hero du site actuel annonce des valeurs
+             différentes : « 344+ cabinets · 266 000+ actes générés ». -->
+        <div class="stat">
+          <div class="stat-value" data-count="12" data-prefix="+ de " data-suffix=" h">+ de 0 h</div>
+          <div class="stat-label">gagnées par semaine</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="344" data-prefix="+ de ">+ de 0</div>
+          <div class="stat-label">cabinets accompagnés</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="270000" data-prefix="+ de ">+ de 0</div>
+          <div class="stat-label">actes rédigés</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Banderole de logos ===================== -->
+  <section class="marquee-section" aria-label="Cabinets qui nous font confiance">
+    <div class="container">
+      <p class="eyebrow eyebrow--center">Ils nous font confiance</p>
+    </div>
+    <div class="marquee" id="marquee">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="SEA Avocats" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/lavole.jpg" alt="Cabinet Lavolé" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/borzakian.webp" alt="Cabinet Borzakian" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/proust.png" alt="Cabinet Proust" width="240" height="80" /></span>
+          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="Cabinet SMETH" width="240" height="80" /></span>
+          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="UJA de Paris" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="Barreau de Paris" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="SaintEx Avocats" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/illouz.jpg" alt="Illouz Partners" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="Chappel Avocat" width="240" height="80" /></span>
+        </div>
+        <div class="marquee-group" aria-hidden="true">
+          <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/lavole.jpg" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/borzakian.webp" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/proust.png" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/illouz.jpg" alt="" width="240" height="80" /></span>
+          <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="" width="240" height="80" /></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Mieux conclure, plus rapidement ===================== -->
+  <section class="section demo-videos">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="h2">Mieux conclure, plus rapidement</h2>
+        <p class="lead">Hector prend en charge les tâches les plus chronophages pour vous permettre de vous concentrer sur la valeur de votre expertise : affiner l’argumentation, définir la stratégie et accompagner vos clients.</p>
+      </div>
+      <article class="video-card">
+        <video src="assets/media/mieux-conclure.mp4" preload="metadata" controls autoplay muted loop playsinline aria-label="Démonstration du fonctionnement d’Hector"></video>
+        <div class="video-card__foot">
+          <a class="btn btn-solid" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== Sécurité & confidentialité ===================== -->
+  <section class="section security">
+    <div class="container">
+      <div class="section-head section-head--left">
+        <span class="eyebrow">Sécurité &amp; confidentialité</span>
+        <h2 class="h2">Le secret professionnel n’est pas une option.</h2>
+        <p class="lead">Hector est conçu pour les exigences déontologiques de l’avocat. Vos données ne quittent jamais un environnement maîtrisé.</p>
+      </div>
+      <ul class="check-list">
+        <li>Vos données ne sont jamais utilisées pour entraîner nos modèles</li>
+        <li>Chiffrement de bout en bout (AES-256) de toutes vos informations</li>
+        <li>Données hébergées exclusivement chez OVH en France</li>
+        <li>Audits de sécurité réguliers et tests de pénétration</li>
+      </ul>
+      <div class="security-cards">
+        <div class="security-card"><h3>Confidentialité absolue</h3><p>Vos dossiers et conversations restent strictement privés et cloisonnés.</p></div>
+        <div class="security-card"><h3>Conformité RGPD</h3><p>Respect total du règlement européen sur la protection des données personnelles.</p></div>
+        <div class="security-card"><h3>Hébergement OVH France</h3><p>Toutes vos données sont stockées chez OVH, à Gravelines (France), sans transfert hors UE.</p></div>
+        <div class="security-card"><h3>Zéro rétention IA</h3><p>Aucune conservation de vos données par les modèles de langage.</p></div>
+        <div class="security-card"><h3>Infrastructure souveraine</h3><p>Infrastructure de stockage certifiée ISO 27001.</p></div>
+        <div class="security-card"><h3>Secret professionnel</h3><p>Architecture conçue pour respecter les obligations déontologiques des avocats.</p></div>
+        <div class="security-card"><h3>Certifié CNB</h3><p>Conforme aux recommandations du Conseil national des barreaux d’avril 2026.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Notre vision ===================== -->
+  <section class="section vision">
+    <div class="container">
+      <div class="vision-inner">
+        <span class="eyebrow">Notre vision</span>
+        <h2 class="h2">L’IA agentique qui travaille pour l’avocat, pas à sa place</h2>
+        <p class="vision-p">Le même constat revient dans tous les cabinets que nous avons croisés&nbsp;: le temps part dans la préparation, et il en reste trop peu pour le conseil, la stratégie et le développement du cabinet.</p>
+        <p class="vision-p">Hector existe pour inverser ce rapport. Il prend les tâches chronophages&nbsp;: lire les pièces, reconstituer la chronologie, chercher la jurisprudence, proposer un plan, et vous rend le temps de l’essentiel.</p>
+        <p class="vision-p">Nous mettons l’IA là où elle fait gagner du temps, et nulle part ailleurs. Un acte qui sort d’Hector n’existe que quand un avocat l’a validé.</p>
+        <p class="vision-sign">— Marcus, Benoit, Matthieu, fondateurs</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA final ===================== -->
+  <section class="section cta">
+    <div class="container">
+      <h2 class="h2 cta-title">Prêt à accélérer votre pratique du contentieux ?</h2>
+      <a class="btn btn-solid" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
+    </div>
+  </section>
+
+  <div class="wordmark-band">
+    <img src="assets/logo.svg" alt="Hector" class="wordmark" />
+  </div>
+</main>
+
+<!-- ===================== Pied de page ===================== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="https://www.hector.legal/index.html" aria-label="Accueil Hector AI">
+          <img src="assets/plume.png" alt="Hector" width="1144" height="1190" class="footer-logo" />
+        </a>
+        <p>L’intelligence artificielle spécialisée en contentieux français, au service des avocats.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="https://www.hector.legal/index.html">Accueil</a></li>
+          <li><a href="https://www.hector.legal/comment-ca-marche.html">Comment ça marche</a></li>
+          <li><a href="https://www.hector.legal/faq.html">FAQ</a></li>
+          <li><a href="https://www.hector.legal/contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="https://www.hector.legal/mentions-legales.html">Mentions légales</a></li>
+          <li><a href="https://www.hector.legal/cgu.html">CGU</a></li>
+          <li><a href="https://www.hector.legal/cgv.html">CGV</a></li>
+          <li><a href="https://www.hector.legal/politique-confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="https://www.hector.legal/dpa.html">DPA</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Hector AI</span>
+      <a href="mailto:benoit.raillard@hector.legal">benoit.raillard@hector.legal</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

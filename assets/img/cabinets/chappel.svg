@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" role="img" aria-label="Chappel Avocat">
+  <style>
+    .wm { font-family: 'EB Garamond', Garamond, 'Times New Roman', serif; font-weight: 500; fill: #1c1c1c; letter-spacing: 6px; }
+    .sub { font-family: 'EB Garamond', Garamond, serif; font-weight: 400; fill: #6b6b68; letter-spacing: 14px; }
+  </style>
+  <text x="260" y="102" text-anchor="middle" class="wm" font-size="72">CHAPPEL</text>
+  <line x1="180" y1="128" x2="340" y2="128" stroke="#1c1c1c" stroke-width="1"/>
+  <text x="260" y="162" text-anchor="middle" class="sub" font-size="20">AVOCAT</text>
+</svg>

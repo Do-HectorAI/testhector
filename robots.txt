@@ -1,0 +1,9 @@
+# Maquette de travail — ne pas indexer.
+# Attention : sur une « project page » GitHub (compte.github.io/depot/), ce fichier
+# n'est PAS lu par les moteurs, qui ne consultent que le robots.txt à la racine du
+# domaine. C'est la balise <meta name="robots" content="noindex"> dans index.html
+# qui fait réellement le travail. Ce fichier ne sert que si la maquette est un jour
+# déployée à la racine d'un domaine (Netlify, Vercel…).
+
+User-agent: *
+Disallow: /

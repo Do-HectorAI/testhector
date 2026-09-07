@@ -86,11 +86,19 @@
 
   <!-- ===================== Hero ===================== -->
   <section class="hero">
-    <!-- Fond vidéo : désaturé, flouté et assombri pour ne pas concurrencer
-         la fausse interface. Réglages en haut de la section 6 de style.css. -->
+    <!-- Fond image : flouté et assombri pour ne pas concurrencer la fausse
+         interface. Réglages en haut de la section 6 de style.css.
+         Source haute définition : assets/media/image.jpg — les trois variantes
+         servies ici en sont dérivées (cf. README, « Le fond du hero »). -->
     <div class="hero-media" aria-hidden="true">
-      <video id="hero-video" src="assets/media/hero.mp4" poster="assets/img/hero-poster.jpg"
-             autoplay muted loop playsinline preload="auto"></video>
+      <img id="hero-bg"
+           src="assets/img/hero-bg-1920.jpg"
+           srcset="assets/img/hero-bg-1280.jpg 1280w,
+                   assets/img/hero-bg-1920.jpg 1920w,
+                   assets/img/hero-bg-2816.jpg 2816w"
+           sizes="100vw"
+           width="2816" height="1504"
+           alt="" decoding="async" fetchpriority="high" loading="eager" />
     </div>
 
     <div class="hero__content">
@@ -100,7 +108,10 @@
 
     <!-- ---------- Fausse interface (maquette, aucune donnée réelle) ---------- -->
     <div class="app-wrap">
-      <p class="app-hint" id="app-hint">Interface de démonstration — cliquez pour l’explorer.</p>
+      <div class="app-intro">
+        <span class="app-intro__badge">Interface interactive</span>
+        <h2 class="app-intro__title">Prenez la main sur un dossier réel</h2>
+      </div>
 
       <!-- Navigation simplifiée, mobile uniquement -->
       <div class="app-mobile-nav" role="tablist" aria-label="Écrans de la démonstration">
@@ -311,29 +322,6 @@
     </div>
   </section>
 
-  <!-- ===================== Chiffres ===================== -->
-  <section class="section stats-section" aria-label="Chiffres clés">
-    <div class="container">
-      <div class="stats-grid" id="stats">
-        <!-- TODO à trancher : valeurs reprises de la section « chiffres » de hector.legal
-             le 25/08/2026 (12 h / 344 / 270 000). Le hero du site actuel annonce des valeurs
-             différentes : « 344+ cabinets · 266 000+ actes générés ». -->
-        <div class="stat">
-          <div class="stat-value" data-count="12" data-prefix="+ de " data-suffix=" h">+ de 0 h</div>
-          <div class="stat-label">gagnées par semaine</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" data-count="344" data-prefix="+ de ">+ de 0</div>
-          <div class="stat-label">cabinets accompagnés</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" data-count="270000" data-prefix="+ de ">+ de 0</div>
-          <div class="stat-label">actes rédigés</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===================== Banderole de logos ===================== -->
   <section class="marquee-section" aria-label="Cabinets qui nous font confiance">
     <div class="container">
@@ -364,6 +352,112 @@
           <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="" width="240" height="80" /></span>
           <span class="marquee-item"><img src="assets/img/cabinets/illouz.jpg" alt="" width="240" height="80" /></span>
           <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="" width="240" height="80" /></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Chiffres ===================== -->
+  <section class="section stats-section" aria-label="Chiffres clés">
+    <div class="container">
+      <div class="stats-grid" id="stats">
+        <!-- TODO à trancher : valeurs reprises de la section « chiffres » de hector.legal
+             le 25/08/2026 (12 h / 344 / 270 000). Le hero du site actuel annonce des valeurs
+             différentes : « 344+ cabinets · 266 000+ actes générés ». -->
+        <div class="stat">
+          <div class="stat-value" data-count="12" data-prefix="+ de " data-suffix=" h">+ de 0 h</div>
+          <div class="stat-label">gagnées par semaine</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="344" data-prefix="+ de ">+ de 0</div>
+          <div class="stat-label">cabinets accompagnés</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" data-count="270000" data-prefix="+ de ">+ de 0</div>
+          <div class="stat-label">actes rédigés</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Fonctionnalités ===================== -->
+  <!-- Carrousel à onglets : les trois visuels sont posés côte à côte sur un rail
+       que l'on translate. Les cartes inactives sont neutralisées (inert +
+       aria-hidden) pour rester hors du parcours clavier et hors des lecteurs
+       d'écran, sans sortir du DOM — c'est ce qui permet le glissement. -->
+  <section class="section features" id="fonctionnalites" aria-labelledby="features-title">
+    <div class="container">
+      <h2 class="sr-only" id="features-title">Fonctionnalités</h2>
+
+      <div class="section-head">
+        <p class="lead">Hector accompagne le contentieux de bout en bout&nbsp;: analyser un dossier, rédiger un acte et gérer vos affaires au quotidien. Cliquez sur un point pour en savoir plus.</p>
+      </div>
+
+      <div class="features-carousel" id="features-carousel">
+
+        <div class="feat-tabs" role="tablist" aria-label="Fonctionnalités d’Hector">
+          <button type="button" class="feat-tab is-active" role="tab"
+                  id="feat-tab-0" aria-controls="feat-panel-0" aria-selected="true" tabindex="0">
+            <svg class="i" aria-hidden="true"><use href="#i-folder-open"/></svg><span>Organisez</span>
+          </button>
+          <button type="button" class="feat-tab" role="tab"
+                  id="feat-tab-1" aria-controls="feat-panel-1" aria-selected="false" tabindex="-1">
+            <svg class="i" aria-hidden="true"><use href="#i-grid"/></svg><span>Analysez</span>
+          </button>
+          <button type="button" class="feat-tab" role="tab"
+                  id="feat-tab-2" aria-controls="feat-panel-2" aria-selected="false" tabindex="-1">
+            <svg class="i" aria-hidden="true"><use href="#i-feather"/></svg><span>Rédigez</span>
+          </button>
+        </div>
+
+        <div class="feat-stage">
+          <div class="feat-rail" id="feat-rail">
+
+            <article class="feat-card" role="tabpanel" id="feat-panel-0" aria-labelledby="feat-tab-0">
+              <div class="feat-card__body">
+                <h3 class="feat-card__title">
+                  <!-- Lien étendu : le ::after couvre toute la carte, ce qui la rend
+                       cliquable en entier tout en ne créant qu'une seule tabulation. -->
+                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#gestion">Organisez</a>
+                </h3>
+                <p class="feat-card__text">Préparez vos pièces et centralisez vos dossiers&nbsp;: Hector structure et sécurise l’ensemble de votre contentieux, au même endroit.</p>
+                <span class="feat-card__more">Gérez votre contentieux <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+              </div>
+              <div class="feat-card__media">
+                <img src="assets/img/fonctionnalites/organiser.jpg" alt="Écran d’Hector affichant la liste des dossiers du cabinet"
+                     width="1600" height="918" loading="lazy" decoding="async" />
+              </div>
+            </article>
+
+            <article class="feat-card" role="tabpanel" id="feat-panel-1" aria-labelledby="feat-tab-1">
+              <div class="feat-card__body">
+                <h3 class="feat-card__title">
+                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#analyse">Analysez</a>
+                </h3>
+                <p class="feat-card__text">De la lecture des pièces à la recherche de jurisprudence, Hector transforme un dossier volumineux en éléments directement exploitables.</p>
+                <span class="feat-card__more">Analysez vos dossiers <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+              </div>
+              <div class="feat-card__media">
+                <img src="assets/img/fonctionnalites/analyser.jpg" alt="Écran d’Hector affichant le détail d’un dossier et ses pièces"
+                     width="1600" height="918" loading="lazy" decoding="async" />
+              </div>
+            </article>
+
+            <article class="feat-card" role="tabpanel" id="feat-panel-2" aria-labelledby="feat-tab-2">
+              <div class="feat-card__body">
+                <h3 class="feat-card__title">
+                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#redaction">Rédigez</a>
+                </h3>
+                <p class="feat-card__text">Du plan détaillé à l’acte finalisé dans Word, Hector accélère la rédaction sans jamais vous déposséder de votre plume.</p>
+                <span class="feat-card__more">Rédigez vos actes <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+              </div>
+              <div class="feat-card__media">
+                <img src="assets/img/fonctionnalites/rediger.jpg" alt="Écran d’Hector affichant une nouvelle conversation de rédaction"
+                     width="1600" height="918" loading="lazy" decoding="async" />
+              </div>
+            </article>
+
+          </div>
         </div>
       </div>
     </div>

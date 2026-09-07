@@ -121,7 +121,6 @@
     var sideConv = document.getElementById('side-conv');
     var mobileTabs = document.querySelectorAll('.app-mobile-nav [data-goto]');
     var pulsingRow = document.getElementById('row-techinov');
-    var hint = document.getElementById('app-hint');
 
     function showScreen(name) {
       app.setAttribute('data-screen', name);
@@ -143,9 +142,9 @@
       if (name === 'dossier' && piecesEl) piecesEl.scrollTop = 0;
     }
 
+    // Le titre du bloc reste affiché : seul le halo de la ligne s'éteint.
     function stopPulse() {
       if (pulsingRow) pulsingRow.classList.remove('is-pulsing');
-      if (hint) hint.classList.add('is-hidden');
     }
 
     // Tout élément porteur de data-goto navigue ; le premier clic
@@ -187,16 +186,6 @@
   }
 
   /* -----------------------------------------------------------------
-     Fond vidéo du hero : figé si l'utilisateur limite les animations
-     ----------------------------------------------------------------- */
-  var heroVideo = document.getElementById('hero-video');
-  if (heroVideo && reduceMotion) {
-    heroVideo.autoplay = false;
-    heroVideo.removeAttribute('autoplay');
-    heroVideo.pause();
-  }
-
-  /* -----------------------------------------------------------------
      En-tête : opaque une fois le hero dépassé
      ----------------------------------------------------------------- */
   var header = document.getElementById('site-header');
@@ -230,6 +219,67 @@
         toggle.setAttribute('aria-expanded', 'false');
       }
     });
+  }
+
+  /* -----------------------------------------------------------------
+     Fonctionnalités : carrousel à onglets
+     Motif ARIA « tabs » : un seul onglet tabulable à la fois (roving
+     tabindex), flèches pour circuler, Home/Fin pour les extrémités.
+     Les cartes masquées restent dans le DOM pour permettre le
+     glissement, mais sont neutralisées (inert + aria-hidden).
+     ----------------------------------------------------------------- */
+  var carousel = document.getElementById('features-carousel');
+
+  if (carousel) {
+    var rail = document.getElementById('feat-rail');
+    var tabs = carousel.querySelectorAll('.feat-tab');
+    var cards = carousel.querySelectorAll('.feat-card');
+    var current = 0;
+
+    function selectFeature(index, moveFocus) {
+      current = index;
+
+      for (var i = 0; i < tabs.length; i++) {
+        var active = i === index;
+        tabs[i].classList.toggle('is-active', active);
+        tabs[i].setAttribute('aria-selected', String(active));
+        // Roving tabindex : seul l'onglet actif est atteignable au clavier.
+        tabs[i].setAttribute('tabindex', active ? '0' : '-1');
+
+        // La carte inactive sort du parcours clavier et des lecteurs d'écran.
+        // `inert` suffit là où il est reconnu ; aria-hidden et le tabindex du
+        // lien assurent le repli sur les navigateurs plus anciens.
+        cards[i].inert = !active;
+        cards[i].setAttribute('aria-hidden', String(!active));
+        var link = cards[i].querySelector('.feat-card__link');
+        if (link) link.setAttribute('tabindex', active ? '0' : '-1');
+      }
+
+      rail.style.transform = 'translateX(' + (-index * (100 / tabs.length)) + '%)';
+      if (moveFocus) tabs[index].focus();
+    }
+
+    for (var t = 0; t < tabs.length; t++) {
+      (function (i) {
+        tabs[i].addEventListener('click', function () { selectFeature(i, false); });
+      })(t);
+    }
+
+    carousel.querySelector('.feat-tabs').addEventListener('keydown', function (e) {
+      var last = tabs.length - 1;
+      var next;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = current === last ? 0 : current + 1;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = current === 0 ? last : current - 1;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = last;
+      else return;
+
+      e.preventDefault();
+      selectFeature(next, true);
+    });
+
+    selectFeature(0, false);
   }
 
   /* -----------------------------------------------------------------

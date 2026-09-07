@@ -58,13 +58,55 @@ assets/
   fonts/                Cabinet Grotesk (400/500/700/800) + Satoshi (500/700), .woff2
   img/
     hector-wordmark.webp  Logotype « Hector » utilisé DANS la fausse interface
+    hero-bg-*.jpg         Fond du hero, 3 largeurs (cf. « Le fond du hero »)
     cabinets/             Logos des cabinets, repris du site actuel
+    fonctionnalites/      Les 3 visuels du carrousel, dérivés de refs/
   media/
-    hero.mp4              Fond vidéo du hero (ré-encodé en 1600 px, sans audio : 3,5 Mo)
+    image.jpg             Source haute définition du fond du hero (2816 px, non servie)
+    hero.mp4              Ancien fond vidéo du hero — conservé, plus utilisé par la page
     mieux-conclure.mp4    Vidéo de la section « Mieux conclure, plus rapidement »
 refs/                   Les trois captures de la vraie application (référence)
 PROMPT.md               Le brief d’origine
 ```
+
+---
+
+## Les visuels du carrousel « Fonctionnalités »
+
+Dérivés des trois captures de `refs/`, régénérables avec `sips` :
+
+```bash
+sips -Z 1600 -s format jpeg -s formatOptions 72 \
+     --out assets/img/fonctionnalites/organiser.jpg refs/capture-1-dossiers.png
+sips -Z 1600 -s format jpeg -s formatOptions 72 \
+     --out assets/img/fonctionnalites/analyser.jpg  refs/capture-2-detail-dossier.png
+sips -Z 1600 -s format jpeg -s formatOptions 72 \
+     --out assets/img/fonctionnalites/rediger.jpg   refs/capture-3-nouvelle-conversation.png
+```
+
+`refs/` reste un dossier de référence, non servi par la page.
+
+---
+
+## Le fond du hero
+
+La source est `assets/media/image.jpg` (2816 × 1504, 3,2 Mo). Elle **n'est pas servie
+telle quelle** : la page charge trois dérivées dans `assets/img/`, choisies par le
+navigateur via `srcset` (154 Ko / 328 Ko / 752 Ko).
+
+Elles sont régénérées avec `sips`, livré avec macOS — aucune dépendance à installer :
+
+```bash
+for w in 1280 1920 2816; do
+  sips -Z $w -s format jpeg -s formatOptions 55 \
+       --out "assets/img/hero-bg-${w}.jpg" assets/media/image.jpg
+done
+```
+
+La qualité 55 est volontairement basse : l'image est floutée à 6 px et couverte d'un voile
+noir dans le hero, les artefacts JPEG y sont invisibles.
+
+Pour remplacer le fond, déposer une nouvelle `assets/media/image.jpg` et relancer la boucle.
 
 ---
 
@@ -80,13 +122,20 @@ téléchargées depuis Fontshare et **hébergées en local** (aucun CDN).
 **Structure de la page**
 
 1. En-tête repris du site actuel (mêmes libellés, mêmes liens), transparent sur le hero noir puis opaque au scroll.
-2. Hero : fond vidéo désaturé, flouté et assombri, puis titre, sous-titre, **fausse interface**
-   et les deux boutons. Les trois curseurs de réglage du fond (`--hero-video-opacity`,
-   `--hero-video-blur`, `--hero-video-veil`) sont en haut de la section 6 de `style.css`.
-   Mettre `--hero-video-opacity: 0` suffit à revenir à un fond noir uni.
-3. Chiffres animés (compteur au scroll) + banderole de logos en boucle, en niveaux de gris, en pause au survol.
-4. « Mieux conclure, plus rapidement » : texte et **vidéo repris tels quels**.
-5. « Sécurité & confidentialité », « Notre vision », CTA final, wordmark, footer : **contenu identique au site actuel**, simplement rehabillé.
+2. Hero : fond image flouté et assombri, puis badge « Interface interactive », titre,
+   sous-titre, **fausse interface** et les deux boutons. Les quatre curseurs de réglage du
+   fond (`--hero-media-opacity`, `--hero-media-blur`, `--hero-media-veil`,
+   `--hero-media-saturate`) sont en haut de la section 6 de `style.css`.
+   Mettre `--hero-media-opacity: 0` suffit à revenir à un fond noir uni.
+3. Banderole de logos en boucle, en niveaux de gris, en pause au survol, puis chiffres animés
+   (compteur au scroll).
+4. « Fonctionnalités » : carrousel à trois onglets (Organisez / Analysez / Rédigez). Chaque carte
+   est cliquable en entier et pointe vers la section correspondante de `comment-ca-marche.html`
+   sur le site en ligne. Motif ARIA « tabs » : flèches, Home/Fin, roving tabindex ; les cartes
+   inactives sont neutralisées (`inert` + `aria-hidden`) sans quitter le DOM, ce qui permet le
+   glissement. Le rail ne glisse pas sous `prefers-reduced-motion`.
+5. « Mieux conclure, plus rapidement » : texte et **vidéo repris tels quels**.
+6. « Sécurité & confidentialité », « Notre vision », CTA final, wordmark, footer : **contenu identique au site actuel**, simplement rehabillé.
 
 **La fausse interface** — entièrement HTML/CSS/JS, aucune donnée réelle, aucun appel réseau.
 Toutes les données (les 8 pièces, les 8 actions rapides, les suggestions) sont en dur dans

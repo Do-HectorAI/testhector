@@ -165,11 +165,11 @@ h1, h2, h3, h4 {
    6. Hero (fond noir) + fausse interface
    --------------------------------------------------------------- */
 .hero {
-  /* --- Réglages du fond vidéo : les trois curseurs à bouger --- */
-  --hero-video-opacity: .45;   /* 0 = fond noir uni, 1 = vidéo à pleine intensité */
-  --hero-video-blur: 7px;      /* 0 = net */
-  --hero-video-veil: .55;      /* voile noir par-dessus : plus haut = plus sombre */
-  --hero-video-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
+  /* --- Réglages du fond : les quatre curseurs à bouger --- */
+  --hero-media-opacity: 1;     /* 0 = fond noir uni, 1 = image à pleine intensité */
+  --hero-media-blur: 0px;      /* 0 = net */
+  --hero-media-veil: 0;        /* voile noir par-dessus : 0 = aucun, .5 = à mi-chemin */
+  --hero-media-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
 
   position: relative;
   isolation: isolate;
@@ -181,26 +181,35 @@ h1, h2, h3, h4 {
 }
 
 .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: var(--black); }
-.hero-media video {
+.hero-media img {
   width: 100%; height: 100%; object-fit: cover;
-  opacity: var(--hero-video-opacity);
+  /* Cadrage : la façade du Palais est haute dans l'image, on garde le haut. */
+  object-position: 50% 38%;
+  opacity: var(--hero-media-opacity);
   /* scale : évite que le flou laisse apparaître les bords. */
-  filter: saturate(var(--hero-video-saturate)) blur(var(--hero-video-blur));
+  filter: saturate(var(--hero-media-saturate)) blur(var(--hero-media-blur));
   transform: scale(1.08);
 }
-/* Voile dégradé : plus dense en haut (sous l'en-tête) et en bas (sous la fenêtre). */
+/* Voile dégradé, désactivé par défaut (--hero-media-veil: 0) : l'image se voit
+   telle quelle. Les coefficients sont multiplicatifs, donc à 0 le dégradé est
+   entièrement transparent ; le remonter assombrit d'abord le haut et le bas. */
 .hero-media::after {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(
-    rgba(0,0,0,calc(var(--hero-video-veil) + .2)) 0%,
-    rgba(0,0,0,var(--hero-video-veil)) 40%,
-    rgba(0,0,0,calc(var(--hero-video-veil) + .25)) 100%);
+    rgba(0,0,0,calc(var(--hero-media-veil) * 1.35)) 0%,
+    rgba(0,0,0,var(--hero-media-veil)) 40%,
+    rgba(0,0,0,calc(var(--hero-media-veil) * 1.45)) 100%);
 }
 .hero__content { max-width: 60rem; margin-inline: auto; }
-.hero__title { font-weight: 700; font-size: clamp(2.1rem, 5.2vw, 3.6rem); margin-bottom: 1.5rem; }
+
+.hero__title {
+  font-weight: 700; font-size: clamp(2.1rem, 5.2vw, 3.6rem); margin-bottom: 1.5rem;
+  text-shadow: 0 2px 24px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.5);
+}
 .hero__subtitle {
-  max-width: 40rem; margin: 0 auto; color: rgba(255,255,255,.78);
+  max-width: 40rem; margin: 0 auto; color: rgba(255,255,255,.92);
   font-size: clamp(1rem, 1.6vw, 1.25rem);
+  text-shadow: 0 2px 16px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.5);
 }
 
 .hero__actions {
@@ -210,11 +219,25 @@ h1, h2, h3, h4 {
 
 .app-wrap { max-width: 74rem; margin: clamp(2rem, 4vw, 2.75rem) auto 0; }
 
-.app-hint {
-  margin: 0 0 1rem; font-size: .8125rem; letter-spacing: .04em;
-  color: rgba(255,255,255,.55); transition: opacity .4s;
+/* Intitulé du bloc de démonstration : surtitre en pastille + titre.
+   Comme l'image de fond n'est plus voilée, le contraste est porté par
+   l'ombre portée du titre et par le fond translucide de la pastille. */
+.app-intro { margin: 0 0 1.25rem; }
+
+.app-intro__badge {
+  display: inline-block; margin-bottom: .75rem;
+  padding: .4rem .85rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.28); background: rgba(0,0,0,.38);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  font-family: var(--font-body); font-size: .75rem; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--white);
 }
-.app-hint.is-hidden { opacity: 0; }
+
+.app-intro__title {
+  margin: 0; font-weight: 700; color: var(--white);
+  font-size: clamp(1.375rem, 2.6vw, 2rem);
+  text-shadow: 0 2px 18px rgba(0,0,0,.65), 0 1px 3px rgba(0,0,0,.5);
+}
 
 /* Navigation simplifiée, mobile uniquement */
 .app-mobile-nav { display: none; gap: .375rem; margin-bottom: .875rem; }
@@ -584,7 +607,13 @@ h1, h2, h3, h4 {
 /* ---------------------------------------------------------------
    8. Banderole de logos
    --------------------------------------------------------------- */
-.marquee-section { padding-block: clamp(3rem, 5vw, 4rem); border-bottom: 1px solid var(--g-200); }
+/* --marquee-bg : couleur des deux fondus latéraux. Elle doit suivre le fond de
+   la section, sinon les fondus se voient dès que la banderole est déplacée. */
+.marquee-section {
+  --marquee-bg: var(--white);
+  background: var(--marquee-bg);
+  padding-block: clamp(3rem, 5vw, 4rem); border-bottom: 1px solid var(--g-200);
+}
 .eyebrow {
   display: inline-block; font-size: .75rem; font-weight: 700;
   letter-spacing: .15em; text-transform: uppercase; color: var(--g-600);
@@ -595,8 +624,8 @@ h1, h2, h3, h4 {
 .marquee::before, .marquee::after {
   content: ''; position: absolute; top: 0; bottom: 0; width: 6rem; z-index: 2; pointer-events: none;
 }
-.marquee::before { left: 0; background: linear-gradient(90deg, #fff, rgba(255,255,255,0)); }
-.marquee::after  { right: 0; background: linear-gradient(270deg, #fff, rgba(255,255,255,0)); }
+.marquee::before { left: 0; background: linear-gradient(90deg, var(--marquee-bg), transparent); }
+.marquee::after  { right: 0; background: linear-gradient(270deg, var(--marquee-bg), transparent); }
 
 .marquee-track { display: flex; width: max-content; animation: marquee 55s linear infinite; }
 .marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
@@ -665,6 +694,68 @@ h1, h2, h3, h4 {
 .wordmark { width: 100%; max-width: 53.125rem; margin-inline: auto; filter: brightness(0); }
 
 /* ---------------------------------------------------------------
+   9 bis. Fonctionnalités (carrousel à onglets)
+   --------------------------------------------------------------- */
+.features { background: var(--white); }
+.features .section-head { margin-bottom: clamp(2rem, 3.5vw, 2.75rem); }
+
+/* --- Onglets --- */
+.feat-tabs {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: .5rem; margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+.feat-tab {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .7rem 1.25rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--g-200); background: var(--white); color: var(--g-700);
+  font-size: .95rem; font-weight: 700; white-space: nowrap;
+  transition: border-color .25s, background-color .25s, color .25s;
+}
+.feat-tab .i { font-size: 1.1em; }
+.feat-tab:hover { border-color: var(--g-400); color: var(--ink); }
+.feat-tab.is-active { background: var(--black); border-color: var(--black); color: var(--white); }
+
+/* --- Rail --- */
+/* Les trois cartes sont posées côte à côte sur une piste de 300 % de large ;
+   changer d'onglet translate la piste d'un tiers. */
+.feat-stage { overflow: hidden; border-radius: var(--radius); }
+.feat-rail {
+  display: flex; width: 300%;
+  transition: transform .55s cubic-bezier(.22, .61, .36, 1);
+}
+.feat-card {
+  position: relative; width: calc(100% / 3); flex: none;
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(1.75rem, 3vw, 2.75rem);
+  border: 1px solid var(--g-200); border-radius: var(--radius); background: var(--g-50);
+  transition: border-color .25s;
+}
+.feat-card:hover { border-color: var(--g-400); }
+
+.feat-card__title { font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2.125rem); margin-bottom: .875rem; }
+.feat-card__link { text-decoration: none; }
+/* Lien étendu : toute la carte devient cliquable, mais un seul élément
+   reste dans le parcours clavier. */
+.feat-card__link::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
+.feat-card__link:focus-visible { outline: none; }
+.feat-card__link:focus-visible::after { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.feat-card__text { margin: 0 0 1.25rem; color: var(--g-700); font-size: 1.0625rem; }
+.feat-card__more {
+  display: inline-flex; align-items: center; gap: .45rem;
+  font-size: .95rem; font-weight: 700; color: var(--ink);
+  border-bottom: 1px solid var(--g-300); padding-bottom: .15rem;
+  transition: border-color .25s;
+}
+.feat-card:hover .feat-card__more { border-bottom-color: var(--ink); }
+.feat-card__more .i { stroke-width: 2; transition: transform .25s; }
+.feat-card:hover .feat-card__more .i { transform: translateX(3px); }
+
+.feat-card__media { overflow: hidden; border-radius: var(--radius); border: 1px solid var(--g-200); }
+.feat-card__media img { width: 100%; height: auto; }
+
+/* ---------------------------------------------------------------
    10. Pied de page
    --------------------------------------------------------------- */
 .site-footer { border-top: 1px solid var(--g-200); padding: clamp(3rem, 5vw, 4rem) 0 2rem; }
@@ -722,7 +813,7 @@ h1, h2, h3, h4 {
 
   /* Fausse interface : la barre latérale disparaît, navigation simplifiée */
   .header-logo img { height: 1.6rem; }
-  .app-hint { font-size: .75rem; }
+  .app-intro__title { font-size: 1.25rem; }
   .app-sidebar { display: none; }
   .app-mobile-nav { display: flex; }
   .app-main { padding: .5rem; }
@@ -734,6 +825,11 @@ h1, h2, h3, h4 {
 
 @media (max-width: 720px) {
   .stats-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .feat-card { grid-template-columns: 1fr; gap: 1.5rem; }
+  .feat-card__body { order: 2; }
+  .feat-card__media { order: 1; }
+  .feat-tabs { gap: .375rem; }
+  .feat-tab { padding: .6rem .9rem; font-size: .875rem; }
   .security-cards, .check-list { grid-template-columns: 1fr; }
   .quick-grid { grid-template-columns: 1fr; }
   .vision-p { text-align: left; }
@@ -773,6 +869,7 @@ h1, h2, h3, h4 {
     transition-duration: .001ms !important;
   }
   .marquee-track { animation: none; }
+  .feat-rail { transition: none; }
   .marquee { overflow-x: auto; }
   .table-row.is-pulsing { animation: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.16); background: var(--g-50); }
   .btn:hover, .float-chat:hover { transform: none; }

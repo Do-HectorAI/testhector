@@ -222,64 +222,175 @@
   }
 
   /* -----------------------------------------------------------------
-     Fonctionnalités : carrousel à onglets
-     Motif ARIA « tabs » : un seul onglet tabulable à la fois (roving
-     tabindex), flèches pour circuler, Home/Fin pour les extrémités.
-     Les cartes masquées restent dans le DOM pour permettre le
-     glissement, mais sont neutralisées (inert + aria-hidden).
+     Fonctionnalités : cartes empilées pilotées au scroll
+
+     La piste (.stack-track) mesure ~100vh par carte. On y calcule une
+     progression p de 0 à 1, convertie en position continue « pos » entre
+     0 et n-1. Chaque carte i en dérive son état à partir de d = pos - i :
+
+       d < 0  carte encore derrière : décalée vers le bas, réduite, assombrie
+       d = 0  carte active : aucune transformation
+       d > 0  carte sortie : remontée hors champ et effacée
+
+     Rien n'est jamais basculé d'un état à l'autre : tout est interpolé sur
+     le scroll. Seules transform et opacity sont écrites, donc aucun reflow.
      ----------------------------------------------------------------- */
-  var carousel = document.getElementById('features-carousel');
+  var stackTrack = document.getElementById('stack-track');
+  var stackDeck = document.getElementById('stack-deck');
 
-  if (carousel) {
-    var rail = document.getElementById('feat-rail');
-    var tabs = carousel.querySelectorAll('.feat-tab');
-    var cards = carousel.querySelectorAll('.feat-card');
-    var current = 0;
+  if (stackTrack && stackDeck) {
+    var features = document.getElementById('fonctionnalites');
+    var dots = document.querySelectorAll('#stack-dots .stack-dot');
 
-    function selectFeature(index, moveFocus) {
-      current = index;
+    // Les cartes sont en ordre inverse dans le DOM : on les range par data-card.
+    var cardNodes = stackDeck.querySelectorAll('.stack-card');
+    var cards = [];
+    for (var c = 0; c < cardNodes.length; c++) {
+      cards[parseInt(cardNodes[c].getAttribute('data-card'), 10)] = cardNodes[c];
+    }
+    var count = cards.length;
 
-      for (var i = 0; i < tabs.length; i++) {
+    // Réglages lus depuis le CSS : une seule source de vérité.
+    var css = getComputedStyle(features);
+    function setting(name, fallback) {
+      var v = parseFloat(css.getPropertyValue(name));
+      return isNaN(v) ? fallback : v;
+    }
+    var DEPTH_Y = setting('--stack-depth-y', 24);
+    var DEPTH_SCALE = setting('--stack-depth-scale', 0.04);
+    var DEPTH_DIM = setting('--stack-depth-dim', 0.14);
+    var MAX_DEPTH = 2;   // au-delà, les cartes ne s'enfoncent plus
+
+    var narrow = window.matchMedia('(max-width: 900px)');
+    var simplified = false;
+    var lastActive = -1;
+
+    function setActive(index) {
+      if (index === lastActive) return;
+      lastActive = index;
+      for (var i = 0; i < count; i++) {
         var active = i === index;
-        tabs[i].classList.toggle('is-active', active);
-        tabs[i].setAttribute('aria-selected', String(active));
-        // Roving tabindex : seul l'onglet actif est atteignable au clavier.
-        tabs[i].setAttribute('tabindex', active ? '0' : '-1');
-
-        // La carte inactive sort du parcours clavier et des lecteurs d'écran.
-        // `inert` suffit là où il est reconnu ; aria-hidden et le tabindex du
-        // lien assurent le repli sur les navigateurs plus anciens.
-        cards[i].inert = !active;
+        // Seule la carte active est cliquable et atteignable au clavier ;
+        // sans cela, une carte sortie mais encore peinte au-dessus
+        // intercepterait les clics destinés à la carte visible.
+        cards[i].style.pointerEvents = active ? 'auto' : 'none';
         cards[i].setAttribute('aria-hidden', String(!active));
-        var link = cards[i].querySelector('.feat-card__link');
+        var link = cards[i].querySelector('.stack-card__link');
         if (link) link.setAttribute('tabindex', active ? '0' : '-1');
       }
-
-      rail.style.transform = 'translateX(' + (-index * (100 / tabs.length)) + '%)';
-      if (moveFocus) tabs[index].focus();
+      for (var k = 0; k < dots.length; k++) {
+        var on = k === index;
+        dots[k].classList.toggle('is-active', on);
+        if (on) dots[k].setAttribute('aria-current', 'true');
+        else dots[k].removeAttribute('aria-current');
+      }
     }
 
-    for (var t = 0; t < tabs.length; t++) {
+    function paint(pos) {
+      for (var i = 0; i < count; i++) {
+        var card = cards[i];
+        var scrim = card.querySelector('.stack-card__scrim');
+        var d = pos - i;
+        var ty, scale, opacity, dim;
+
+        if (d <= 0) {
+          var depth = Math.min(-d, MAX_DEPTH);
+          ty = (depth * DEPTH_Y) + 'px';
+          scale = 1 - depth * DEPTH_SCALE;
+          opacity = 1;
+          dim = depth * DEPTH_DIM;
+        } else {
+          var t = Math.min(d, 1);
+          ty = (-t * 90) + '%';        // 90 % de sa propre hauteur : hors champ
+          scale = 1;
+          opacity = Math.max(0, 1 - t * 1.5);  // s'efface avant d'avoir fini de monter
+          dim = 0;
+        }
+
+        card.style.transform = 'translate3d(0, ' + ty + ', 0) scale(' + scale.toFixed(4) + ')';
+        card.style.opacity = opacity.toFixed(3);
+        if (scrim) scrim.style.opacity = dim.toFixed(3);
+      }
+    }
+
+    function clearInline() {
+      for (var i = 0; i < count; i++) {
+        cards[i].style.transform = '';
+        cards[i].style.opacity = '';
+        cards[i].style.pointerEvents = '';
+        cards[i].removeAttribute('aria-hidden');
+        var link = cards[i].querySelector('.stack-card__link');
+        if (link) link.removeAttribute('tabindex');
+        var scrim = cards[i].querySelector('.stack-card__scrim');
+        if (scrim) scrim.style.opacity = '';
+      }
+      lastActive = -1;
+    }
+
+    function progress() {
+      var span = stackTrack.offsetHeight - window.innerHeight;
+      if (span <= 0) return 0;
+      var scrolled = -stackTrack.getBoundingClientRect().top;
+      return Math.max(0, Math.min(1, scrolled / span));
+    }
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (simplified) return;
+      var pos = progress() * (count - 1);
+      paint(pos);
+      setActive(Math.round(pos));
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }
+
+    // Aller directement à une carte : on déplace le scroll, le rendu suit.
+    for (var b = 0; b < dots.length; b++) {
       (function (i) {
-        tabs[i].addEventListener('click', function () { selectFeature(i, false); });
-      })(t);
+        dots[b].addEventListener('click', function () {
+          if (simplified) {
+            cards[i].scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+            return;
+          }
+          var span = stackTrack.offsetHeight - window.innerHeight;
+          var top = window.scrollY + stackTrack.getBoundingClientRect().top + (i / (count - 1)) * span;
+          window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+        });
+      })(b);
     }
 
-    carousel.querySelector('.feat-tabs').addEventListener('keydown', function (e) {
-      var last = tabs.length - 1;
-      var next;
+    // Repli sur mobile et en mouvement réduit : cartes qui se suivent,
+    // aucun sticky à tenir, aucun calcul au scroll.
+    function syncMode() {
+      var next = narrow.matches || reduceMotion;
+      if (next === simplified) return;
+      simplified = next;
+      features.classList.toggle('is-simplified', simplified);
 
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = current === last ? 0 : current + 1;
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = current === 0 ? last : current - 1;
-      else if (e.key === 'Home') next = 0;
-      else if (e.key === 'End') next = last;
-      else return;
+      // La hauteur de piste est posée en inline : il faut la retirer en mode
+      // simplifié, sinon elle l'emporterait sur le `height: auto` du CSS.
+      if (simplified) {
+        stackTrack.style.height = '';
+        clearInline();
+      } else {
+        stackTrack.style.height = (count * 100) + 'vh';
+        update();
+      }
+    }
 
-      e.preventDefault();
-      selectFeature(next, true);
+    if (narrow.addEventListener) narrow.addEventListener('change', syncMode);
+    else if (narrow.addListener) narrow.addListener(syncMode);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () {
+      syncMode();
+      onScroll();
     });
 
-    selectFeature(0, false);
+    syncMode();
+    update();
   }
 
   /* -----------------------------------------------------------------

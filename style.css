@@ -694,66 +694,110 @@ h1, h2, h3, h4 {
 .wordmark { width: 100%; max-width: 53.125rem; margin-inline: auto; filter: brightness(0); }
 
 /* ---------------------------------------------------------------
-   9 bis. Fonctionnalités (carrousel à onglets)
+   9 bis. Fonctionnalités — cartes empilées pilotées au scroll
    --------------------------------------------------------------- */
-.features { background: var(--white); }
-.features .section-head { margin-bottom: clamp(2rem, 3.5vw, 2.75rem); }
-
-/* --- Onglets --- */
-.feat-tabs {
-  display: flex; justify-content: center; flex-wrap: wrap;
-  gap: .5rem; margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+/* Réglages de la pile : profondeur d'un niveau vers le bas, réduction
+   d'échelle et assombrissement. Repris tels quels par script.js. */
+.features {
+  --stack-depth-y: 24px;     /* décalage vers le bas par niveau de profondeur */
+  --stack-depth-scale: .04;  /* réduction d'échelle par niveau */
+  --stack-depth-dim: .14;    /* assombrissement par niveau */
+  padding-top: clamp(4.5rem, 8vw, 7rem);
 }
-.feat-tab {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .7rem 1.25rem; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--g-200); background: var(--white); color: var(--g-700);
-  font-size: .95rem; font-weight: 700; white-space: nowrap;
-  transition: border-color .25s, background-color .25s, color .25s;
-}
-.feat-tab .i { font-size: 1.1em; }
-.feat-tab:hover { border-color: var(--g-400); color: var(--ink); }
-.feat-tab.is-active { background: var(--black); border-color: var(--black); color: var(--white); }
+.features-head { margin-bottom: 0; }
 
-/* --- Rail --- */
-/* Les trois cartes sont posées côte à côte sur une piste de 300 % de large ;
-   changer d'onglet translate la piste d'un tiers. */
-.feat-stage { overflow: hidden; border-radius: var(--radius); }
-.feat-rail {
-  display: flex; width: 300%;
-  transition: transform .55s cubic-bezier(.22, .61, .36, 1);
-}
-.feat-card {
-  position: relative; width: calc(100% / 3); flex: none;
-  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center;
-  gap: clamp(1.5rem, 3vw, 3rem);
-  padding: clamp(1.75rem, 3vw, 2.75rem);
-  border: 1px solid var(--g-200); border-radius: var(--radius); background: var(--g-50);
-  transition: border-color .25s;
-}
-.feat-card:hover { border-color: var(--g-400); }
+/* La piste donne au bloc collant sa distance de défilement : ~100vh par carte.
+   Sa hauteur est écrite par script.js à partir du nombre de cartes. */
+.stack-track { position: relative; height: 300vh; }
 
-.feat-card__title { font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2.125rem); margin-bottom: .875rem; }
-.feat-card__link { text-decoration: none; }
-/* Lien étendu : toute la carte devient cliquable, mais un seul élément
-   reste dans le parcours clavier. */
-.feat-card__link::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
-.feat-card__link:focus-visible { outline: none; }
-.feat-card__link:focus-visible::after { outline: 2px solid var(--ink); outline-offset: 3px; }
+.stack-sticky {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;   /* svh : évite le saut dû à la barre d'iOS */
+  display: flex; align-items: center;
+}
+.stack-inner { width: 100%; }
 
-.feat-card__text { margin: 0 0 1.25rem; color: var(--g-700); font-size: 1.0625rem; }
-.feat-card__more {
+/* Le deck porte la hauteur ; les cartes y sont superposées en absolu. */
+.stack-deck { position: relative; height: clamp(20rem, 56vh, 30rem); }
+
+.stack-card {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center; gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(1.5rem, 2.6vw, 2.5rem);
+  border: 1px solid var(--g-200); border-radius: var(--radius);
+  background: var(--g-50);
+  box-shadow: 0 18px 40px -24px rgba(0,0,0,.35);
+  /* Seules transform et opacity sont animées : aucun reflow. */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Voile d'assombrissement des cartes du dessous. Piloté en opacity, donc
+   composé par le GPU comme le reste. */
+.stack-card__scrim {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  border-radius: var(--radius); background: var(--ink); opacity: 0;
+}
+
+.stack-card__title { font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2.125rem); margin-bottom: .875rem; }
+.stack-card__link { text-decoration: none; }
+/* Lien étendu : la carte entière est cliquable, pour une seule tabulation.
+   z-index 3 : au-dessus du voile, pour que le focus reste visible. */
+.stack-card__link::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: var(--radius); }
+.stack-card__link:focus-visible { outline: none; }
+.stack-card__link:focus-visible::after { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.stack-card__text { margin: 0 0 1.25rem; color: var(--g-700); font-size: 1.0625rem; }
+.stack-card__more {
   display: inline-flex; align-items: center; gap: .45rem;
   font-size: .95rem; font-weight: 700; color: var(--ink);
   border-bottom: 1px solid var(--g-300); padding-bottom: .15rem;
   transition: border-color .25s;
 }
-.feat-card:hover .feat-card__more { border-bottom-color: var(--ink); }
-.feat-card__more .i { stroke-width: 2; transition: transform .25s; }
-.feat-card:hover .feat-card__more .i { transform: translateX(3px); }
+.stack-card__more .i { stroke-width: 2; transition: transform .25s; }
+.stack-card:hover .stack-card__more { border-bottom-color: var(--ink); }
+.stack-card:hover .stack-card__more .i { transform: translateX(3px); }
 
-.feat-card__media { overflow: hidden; border-radius: var(--radius); border: 1px solid var(--g-200); }
-.feat-card__media img { width: 100%; height: auto; }
+.stack-card__media {
+  overflow: hidden; border-radius: var(--radius);
+  border: 1px solid var(--g-200); background: var(--white);
+}
+.stack-card__media img { width: 100%; height: auto; }
+
+/* --- Indicateurs de progression --- */
+.stack-dots { display: flex; justify-content: center; gap: .5rem; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+.stack-dot {
+  display: grid; place-items: center;
+  width: 2rem; height: 2rem; padding: 0; cursor: pointer;
+  background: none; border: 0; border-radius: 999px;
+}
+.stack-dot span {
+  display: block; width: .5rem; height: .5rem; border-radius: 999px;
+  background: var(--g-300); transition: background-color .3s, transform .3s;
+}
+.stack-dot:hover span { background: var(--g-500); }
+.stack-dot.is-active span { background: var(--ink); transform: scale(1.35); }
+
+/* --- Repli : mobile et mouvement réduit ---
+   La pile collante est remplacée par trois cartes qui se suivent
+   normalement. Aucune dépendance au scroll, aucun 100vh à tenir. */
+.features.is-simplified .stack-track { height: auto; }
+.features.is-simplified .stack-sticky { position: static; height: auto; display: block; }
+.features.is-simplified .stack-deck {
+  height: auto; display: grid; gap: 1.5rem;
+  /* L'ordre de lecture est rétabli : le DOM est en ordre inverse. */
+  grid-auto-flow: row dense;
+}
+.features.is-simplified .stack-card {
+  position: static; inset: auto;
+  transform: none; opacity: 1; box-shadow: none;
+}
+.features.is-simplified .stack-card[data-card="0"] { order: 0; }
+.features.is-simplified .stack-card[data-card="1"] { order: 1; }
+.features.is-simplified .stack-card[data-card="2"] { order: 2; }
+.features.is-simplified .stack-card__scrim { display: none; }
+.features.is-simplified .stack-dots { display: none; }
 
 /* ---------------------------------------------------------------
    10. Pied de page
@@ -825,11 +869,9 @@ h1, h2, h3, h4 {
 
 @media (max-width: 720px) {
   .stats-grid { grid-template-columns: 1fr; gap: 3rem; }
-  .feat-card { grid-template-columns: 1fr; gap: 1.5rem; }
-  .feat-card__body { order: 2; }
-  .feat-card__media { order: 1; }
-  .feat-tabs { gap: .375rem; }
-  .feat-tab { padding: .6rem .9rem; font-size: .875rem; }
+  .stack-card { grid-template-columns: 1fr; gap: 1.25rem; }
+  .stack-card__body { order: 2; }
+  .stack-card__media { order: 1; }
   .security-cards, .check-list { grid-template-columns: 1fr; }
   .quick-grid { grid-template-columns: 1fr; }
   .vision-p { text-align: left; }
@@ -869,7 +911,6 @@ h1, h2, h3, h4 {
     transition-duration: .001ms !important;
   }
   .marquee-track { animation: none; }
-  .feat-rail { transition: none; }
   .marquee { overflow-x: auto; }
   .table-row.is-pulsing { animation: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.16); background: var(--g-50); }
   .btn:hover, .float-chat:hover { transform: none; }

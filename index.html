@@ -380,84 +380,86 @@
     </div>
   </section>
 
-  <!-- ===================== Fonctionnalités ===================== -->
-  <!-- Carrousel à onglets : les trois visuels sont posés côte à côte sur un rail
-       que l'on translate. Les cartes inactives sont neutralisées (inert +
-       aria-hidden) pour rester hors du parcours clavier et hors des lecteurs
-       d'écran, sans sortir du DOM — c'est ce qui permet le glissement. -->
-  <section class="section features" id="fonctionnalites" aria-labelledby="features-title">
+  <!-- ===================== Fonctionnalités (cartes empilées) ===================== -->
+  <!-- Mécanique : une piste haute (~100vh par carte) donne au bloc collant la
+       distance nécessaire pour dérouler les trois états. Une progression p
+       (0 → 1) est calculée sur cette piste, puis convertie en position
+       continue « pos » entre 0 et 2, dont chaque carte dérive son état.
+       Voir la section 9 bis de style.css et le bloc « Cartes empilées » de
+       script.js. -->
+  <section class="features" id="fonctionnalites" aria-labelledby="features-title">
     <div class="container">
       <h2 class="sr-only" id="features-title">Fonctionnalités</h2>
-
-      <div class="section-head">
+      <div class="section-head features-head">
         <p class="lead">Hector accompagne le contentieux de bout en bout&nbsp;: analyser un dossier, rédiger un acte et gérer vos affaires au quotidien. Cliquez sur un point pour en savoir plus.</p>
       </div>
+    </div>
 
-      <div class="features-carousel" id="features-carousel">
+    <div class="stack-track" id="stack-track">
+      <div class="stack-sticky">
+        <div class="container stack-inner">
 
-        <div class="feat-tabs" role="tablist" aria-label="Fonctionnalités d’Hector">
-          <button type="button" class="feat-tab is-active" role="tab"
-                  id="feat-tab-0" aria-controls="feat-panel-0" aria-selected="true" tabindex="0">
-            <svg class="i" aria-hidden="true"><use href="#i-folder-open"/></svg><span>Organisez</span>
-          </button>
-          <button type="button" class="feat-tab" role="tab"
-                  id="feat-tab-1" aria-controls="feat-panel-1" aria-selected="false" tabindex="-1">
-            <svg class="i" aria-hidden="true"><use href="#i-grid"/></svg><span>Analysez</span>
-          </button>
-          <button type="button" class="feat-tab" role="tab"
-                  id="feat-tab-2" aria-controls="feat-panel-2" aria-selected="false" tabindex="-1">
-            <svg class="i" aria-hidden="true"><use href="#i-feather"/></svg><span>Rédigez</span>
-          </button>
-        </div>
+          <!-- Les cartes sont en ordre INVERSE dans le DOM (Rédigez, Analysez,
+               Organisez). La dernière peinte est donc la première lue :
+               « Organisez » se retrouve au sommet de la pile sans z-index, et
+               l'ordre de peinture reste correct à tous les états. -->
+          <div class="stack-deck" id="stack-deck">
 
-        <div class="feat-stage">
-          <div class="feat-rail" id="feat-rail">
-
-            <article class="feat-card" role="tabpanel" id="feat-panel-0" aria-labelledby="feat-tab-0">
-              <div class="feat-card__body">
-                <h3 class="feat-card__title">
-                  <!-- Lien étendu : le ::after couvre toute la carte, ce qui la rend
-                       cliquable en entier tout en ne créant qu'une seule tabulation. -->
-                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#gestion">Organisez</a>
+            <article class="stack-card" data-card="2" aria-labelledby="stack-title-2">
+              <div class="stack-card__body">
+                <h3 class="stack-card__title" id="stack-title-2">
+                  <!-- Lien étendu : le ::after couvre la carte entière, qui devient
+                       cliquable sans ajouter de tabulation. -->
+                  <a class="stack-card__link" href="https://www.hector.legal/comment-ca-marche.html#redaction">Rédigez</a>
                 </h3>
-                <p class="feat-card__text">Préparez vos pièces et centralisez vos dossiers&nbsp;: Hector structure et sécurise l’ensemble de votre contentieux, au même endroit.</p>
-                <span class="feat-card__more">Gérez votre contentieux <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+                <p class="stack-card__text">Du plan détaillé à l’acte finalisé dans Word, sans jamais vous déposséder de votre plume.</p>
+                <span class="stack-card__more">Rédigez vos actes <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
               </div>
-              <div class="feat-card__media">
-                <img src="assets/img/fonctionnalites/organiser.jpg" alt="Écran d’Hector affichant la liste des dossiers du cabinet"
-                     width="1600" height="918" loading="lazy" decoding="async" />
-              </div>
-            </article>
-
-            <article class="feat-card" role="tabpanel" id="feat-panel-1" aria-labelledby="feat-tab-1">
-              <div class="feat-card__body">
-                <h3 class="feat-card__title">
-                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#analyse">Analysez</a>
-                </h3>
-                <p class="feat-card__text">De la lecture des pièces à la recherche de jurisprudence, Hector transforme un dossier volumineux en éléments directement exploitables.</p>
-                <span class="feat-card__more">Analysez vos dossiers <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
-              </div>
-              <div class="feat-card__media">
-                <img src="assets/img/fonctionnalites/analyser.jpg" alt="Écran d’Hector affichant le détail d’un dossier et ses pièces"
-                     width="1600" height="918" loading="lazy" decoding="async" />
-              </div>
-            </article>
-
-            <article class="feat-card" role="tabpanel" id="feat-panel-2" aria-labelledby="feat-tab-2">
-              <div class="feat-card__body">
-                <h3 class="feat-card__title">
-                  <a class="feat-card__link" href="https://www.hector.legal/comment-ca-marche.html#redaction">Rédigez</a>
-                </h3>
-                <p class="feat-card__text">Du plan détaillé à l’acte finalisé dans Word, Hector accélère la rédaction sans jamais vous déposséder de votre plume.</p>
-                <span class="feat-card__more">Rédigez vos actes <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
-              </div>
-              <div class="feat-card__media">
+              <div class="stack-card__media">
                 <img src="assets/img/fonctionnalites/rediger.jpg" alt="Écran d’Hector affichant une nouvelle conversation de rédaction"
                      width="1600" height="918" loading="lazy" decoding="async" />
               </div>
+              <span class="stack-card__scrim" aria-hidden="true"></span>
+            </article>
+
+            <article class="stack-card" data-card="1" aria-labelledby="stack-title-1">
+              <div class="stack-card__body">
+                <h3 class="stack-card__title" id="stack-title-1">
+                  <a class="stack-card__link" href="https://www.hector.legal/comment-ca-marche.html#analyse">Analysez</a>
+                </h3>
+                <p class="stack-card__text">Un dossier volumineux transformé en éléments directement exploitables.</p>
+                <span class="stack-card__more">Analysez vos dossiers <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+              </div>
+              <div class="stack-card__media">
+                <img src="assets/img/fonctionnalites/analyser.jpg" alt="Écran d’Hector affichant le détail d’un dossier et ses pièces"
+                     width="1600" height="918" loading="lazy" decoding="async" />
+              </div>
+              <span class="stack-card__scrim" aria-hidden="true"></span>
+            </article>
+
+            <article class="stack-card" data-card="0" aria-labelledby="stack-title-0">
+              <div class="stack-card__body">
+                <h3 class="stack-card__title" id="stack-title-0">
+                  <a class="stack-card__link" href="https://www.hector.legal/comment-ca-marche.html#gestion">Organisez</a>
+                </h3>
+                <p class="stack-card__text">Vos pièces préparées et vos dossiers centralisés, au même endroit.</p>
+                <span class="stack-card__more">Gérez votre contentieux <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+              </div>
+              <div class="stack-card__media">
+                <img src="assets/img/fonctionnalites/organiser.jpg" alt="Écran d’Hector affichant la liste des dossiers du cabinet"
+                     width="1600" height="918" loading="lazy" decoding="async" />
+              </div>
+              <span class="stack-card__scrim" aria-hidden="true"></span>
             </article>
 
           </div>
+
+          <div class="stack-dots" id="stack-dots" role="group" aria-label="Choisir une fonctionnalité">
+            <button type="button" class="stack-dot is-active" data-goto-card="0" aria-label="Aller à la fonctionnalité « Organisez »" aria-current="true"><span></span></button>
+            <button type="button" class="stack-dot" data-goto-card="1" aria-label="Aller à la fonctionnalité « Analysez »"><span></span></button>
+            <button type="button" class="stack-dot" data-goto-card="2" aria-label="Aller à la fonctionnalité « Rédigez »"><span></span></button>
+          </div>
+
         </div>
       </div>
     </div>

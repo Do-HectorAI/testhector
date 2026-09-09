@@ -189,23 +189,26 @@
   }
 
   /* -----------------------------------------------------------------
-     Hero : le média se rétracte au scroll
+     Hero : le média se rétracte sur les côtés au scroll
 
-     Le hero est épinglé en haut d'une piste de deux hauteurs d'écran. On
-     mesure la progression p sur cette piste, on lui applique une courbe
-     ease-out, puis on en déduit un clip-path inset() sur le média et sur la
-     banderole. clip-path est composité : ni largeur, ni marge, ni inset ne
-     sont touchés, donc aucun recalcul de mise en page par image.
+     Le hero est une section normale : la page défile comme partout ailleurs,
+     rien n'est épinglé. On mesure simplement la part du hero déjà passée
+     au-dessus du viewport, et on n'agit que sur sa seconde moitié :
 
-     La boucle ne tourne que pendant que le hero est à l'écran : un
-     IntersectionObserver la démarre et l'arrête, et il n'y a aucun écouteur
-     de scroll. Les valeurs se règlent dans les jetons --hero-clip-* en tête
-     de la section 6 de style.css.
+       0 → 50 % défilé   : rien ne bouge, image pleine largeur
+       50 → 100 % défilé : les côtés se rétractent et les coins s'arrondissent
+
+     La valeur ne dépend que de la position de scroll, jamais du sens : en
+     remontant, l'image se ré-étend d'elle-même.
+
+     Seul clipPath est écrit, donc aucun recalcul de mise en page par image.
+     Aucun écouteur de scroll : un IntersectionObserver démarre et arrête une
+     boucle requestAnimationFrame, active seulement hero à l'écran.
+     Réglages : jetons --hero-clip-* en tête de la section 6 de style.css.
      ----------------------------------------------------------------- */
-  var heroTrack = document.getElementById('hero-track');
-  var heroEl = heroTrack && heroTrack.querySelector('.hero');
+  var heroEl = document.querySelector('.hero');
 
-  if (heroTrack && heroEl && !reduceMotion &&
+  if (heroEl && !reduceMotion &&
       window.CSS && CSS.supports && CSS.supports('clip-path', 'inset(1px round 1px)')) {
     var clipped = [heroEl.querySelector('.hero-media'), heroEl.querySelector('.hero-marquee')];
     var heroCss = getComputedStyle(heroEl);
@@ -220,19 +223,23 @@
       return Math.max(min, Math.min(vw * window.innerWidth / 100, max));
     }
 
-    var xMin = token('--hero-clip-x-min', 16), xVw = token('--hero-clip-x-vw', 4), xMax = token('--hero-clip-x-max', 72);
+    var xMin = token('--hero-clip-x-min', 16), xVw = token('--hero-clip-x-vw', 5), xMax = token('--hero-clip-x-max', 76);
     var rMin = token('--hero-clip-r-min', 16), rVw = token('--hero-clip-r-vw', 2), rMax = token('--hero-clip-r-max', 32);
     var yMax = token('--hero-clip-y-max', 0);
-    var run  = token('--hero-clip-run', .75);
+    var startFrac = token('--hero-clip-start', .5);
+    var runFrac = token('--hero-clip-run', .5);
 
     var running = false;
     var last = -1;
 
     function paintHero() {
-      var span = window.innerHeight * run;          // distance sur laquelle ça s'achève
-      var scrolled = -heroTrack.getBoundingClientRect().top;
-      var p = span > 0 ? Math.max(0, Math.min(1, scrolled / span)) : 0;
-      var eased = 1 - Math.pow(1 - p, 3);           // ease-out cubique
+      var h = heroEl.offsetHeight;
+      var scrolled = -heroEl.getBoundingClientRect().top;
+      var begin = startFrac * h;          // rien avant la mi-hauteur
+      var span = runFrac * h;             // durée de la rétraction
+      var p = span > 0 ? (scrolled - begin) / span : 0;
+      p = Math.max(0, Math.min(1, p));
+      var eased = 1 - Math.pow(1 - p, 3); // ease-out cubique
 
       if (Math.abs(eased - last) > 0.001) {
         last = eased;
@@ -241,7 +248,7 @@
         var r = (clampVw(rMin, rVw, rMax) * eased).toFixed(1);
         clipped[0].style.clipPath = 'inset(' + y + 'px ' + x + 'px ' + y + 'px ' + x + 'px round ' + r + 'px)';
         // La banderole suit la marge latérale mais pas l'arrondi : ses logos
-        // sont déjà estompés au masque avant d'atteindre le bord du panneau.
+        // déborderaient sinon du panneau, sur le fond clair de la page.
         if (clipped[1]) clipped[1].style.clipPath = 'inset(0px ' + x + 'px 0px ' + x + 'px)';
       }
       if (running) requestAnimationFrame(paintHero);
@@ -252,14 +259,13 @@
         var visible = entries[0].isIntersecting;
         if (visible && !running) { running = true; requestAnimationFrame(paintHero); }
         else if (!visible) { running = false; }
-      }, { threshold: 0 }).observe(heroTrack);
+      }, { threshold: 0 }).observe(heroEl);
     } else {
       running = true; requestAnimationFrame(paintHero);
     }
 
-    // Les plafonds dépendent de la largeur : on les recalcule au redimensionnement.
+    // Les plafonds dépendent de la largeur : on repeint au redimensionnement.
     window.addEventListener('resize', function () {
-      xMax = token('--hero-clip-x-max', 72);
       last = -1;
       if (!running) paintHero();
     });
@@ -269,9 +275,7 @@
      En-tête : opaque une fois le hero dépassé
      ----------------------------------------------------------------- */
   var header = document.getElementById('site-header');
-  // On mesure sur la piste, pas sur le hero : le hero est épinglé et ne fait
-  // qu'une hauteur d'écran, alors qu'il reste visible sur toute la piste.
-  var hero = document.getElementById('hero-track') || document.querySelector('.hero');
+  var hero = document.querySelector('.hero');
   if (header && hero) {
     var onScroll = function () {
       var limit = hero.offsetHeight - header.offsetHeight;

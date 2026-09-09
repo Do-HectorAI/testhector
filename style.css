@@ -184,32 +184,30 @@ h1, h2, h3, h4 {
   --hero-clip-r-min: 16;   /* px — rayon final, petits écrans */
   --hero-clip-r-vw: 2;     /* vw */
   --hero-clip-r-max: 32;   /* px — plafond */
-  --hero-clip-run: .75;    /* la rétraction s'achève après .75 hauteur d'écran */
+  /* Départ et durée, en fraction de la hauteur du hero.
+     .5 / .3 : rien ne bouge sur la première moitié ; la rétraction se joue
+     ensuite et s'achève à 80 % du défilement, ce qui laisse voir le panneau
+     arrondi formé avant qu'il ne sorte de l'écran.
+     Monter --hero-clip-run à .5 fait durer la rétraction jusqu'à la sortie ;
+     baisser --hero-clip-start la déclenche plus tôt. */
+  --hero-clip-start: .5;
+  --hero-clip-run: .3;
 
-  position: sticky; top: 0;
+  position: relative;
   isolation: isolate;
-  /* Pas de fond ici : c'est celui de la piste qu'on doit découvrir quand le
-     média se rétracte. Le noir de repli reste porté par .hero-media, qui est
-     clippé avec l'image. */
+  /* Pas de fond ici : c'est celui de la page qu'on doit découvrir quand le
+     média se rétracte sur les côtés. Le noir de repli reste porté par
+     .hero-media, qui est clippé avec l'image. */
   background: transparent;
   color: var(--white);
   /* Colonne : le titre occupe l'espace libre et se centre, la banderole
      reste calée en pied. */
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex; flex-direction: column;
   padding: calc(var(--header-h) + 2.5rem) 1.5rem 0;
   text-align: center;
   overflow: hidden;
-}
-
-/* Piste : deux hauteurs d'écran, dont une consommée par l'épinglage. Le fond
-   est celui de la page : c'est lui qu'on découvre quand le média se rétracte. */
-.hero-track {
-  position: relative;
-  height: 200vh;
-  height: 200dvh;
-  background: var(--white);
 }
 
 /* Le clip-path est composité : aucun recalcul de mise en page par image.
@@ -975,9 +973,7 @@ h1, h2, h3, h4 {
   }
   .marquee-track { animation: none; }
   .demo-hint .i { animation: none; }
-  /* Hero : plein écran figé, et la piste se réduit pour ne pas laisser
-     une hauteur d'écran de défilement sans rien à voir. */
-  .hero-track { height: 100vh; height: 100dvh; }
+  /* Hero : plein écran figé, aucun effet lié au scroll. */
   .hero-media, .hero-marquee { clip-path: none !important; will-change: auto; }
   .feat-rail { transition: none; }
   .marquee { overflow-x: auto; }

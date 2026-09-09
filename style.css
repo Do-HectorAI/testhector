@@ -185,13 +185,13 @@ h1, h2, h3, h4 {
   --hero-clip-r-vw: 2;     /* vw */
   --hero-clip-r-max: 32;   /* px — plafond */
   /* Départ et durée, en fraction de la hauteur du hero.
-     .5 / .3 : rien ne bouge sur la première moitié ; la rétraction se joue
-     ensuite et s'achève à 80 % du défilement, ce qui laisse voir le panneau
-     arrondi formé avant qu'il ne sorte de l'écran.
-     Monter --hero-clip-run à .5 fait durer la rétraction jusqu'à la sortie ;
-     baisser --hero-clip-start la déclenche plus tôt. */
-  --hero-clip-start: .5;
-  --hero-clip-run: .3;
+     .15 / .35 : la rétraction s'amorce tôt et s'achève quand le hero est
+     scrollé de moitié — le panneau arrondi est donc formé alors qu'il occupe
+     encore la moitié haute de l'écran, puis il finit de défiler ainsi.
+     Somme départ + durée = le point d'achèvement : la garder à .5 pour que
+     le mouvement reste accompli à mi-parcours. */
+  --hero-clip-start: .15;
+  --hero-clip-run: .35;
 
   position: relative;
   isolation: isolate;

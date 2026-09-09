@@ -172,20 +172,50 @@ h1, h2, h3, h4 {
   --hero-media-halo: .38;      /* halo sombre derrière le titre seulement */
   --hero-media-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
 
-  position: relative;
+  /* --- Rétraction du média au scroll ---
+     Ces jetons sont lus par script.js : c'est ici qu'on règle l'effet.
+     Ils sont exprimés en nombres nus (pas en clamp()) parce qu'une propriété
+     personnalisée non enregistrée n'est pas résolue par getComputedStyle :
+     le JS reconstruit le clamp lui-même. */
+  --hero-clip-x-min: 16;   /* px — marge latérale finale, petits écrans */
+  --hero-clip-x-vw: 5;     /* vw — marge latérale finale, proportionnelle */
+  --hero-clip-x-max: 76;   /* px — plafond, soit ~2 cm */
+  --hero-clip-y-max: 0;    /* px — marge haut/bas ; 0 = gauche et droite seules */
+  --hero-clip-r-min: 16;   /* px — rayon final, petits écrans */
+  --hero-clip-r-vw: 2;     /* vw */
+  --hero-clip-r-max: 32;   /* px — plafond */
+  --hero-clip-run: .75;    /* la rétraction s'achève après .75 hauteur d'écran */
+
+  position: sticky; top: 0;
   isolation: isolate;
-  background: var(--black);
+  /* Pas de fond ici : c'est celui de la piste qu'on doit découvrir quand le
+     média se rétracte. Le noir de repli reste porté par .hero-media, qui est
+     clippé avec l'image. */
+  background: transparent;
   color: var(--white);
   /* Colonne : le titre occupe l'espace libre et se centre, la banderole
-     reste calée en pied. min-height plutôt que height, pour qu'un texte
-     long ou une grande police ne soit jamais rogné. */
-  min-height: 100vh;
-  min-height: 100svh;
+     reste calée en pied. */
+  height: 100vh;
+  height: 100dvh;
   display: flex; flex-direction: column;
   padding: calc(var(--header-h) + 2.5rem) 1.5rem 0;
   text-align: center;
   overflow: hidden;
 }
+
+/* Piste : deux hauteurs d'écran, dont une consommée par l'épinglage. Le fond
+   est celui de la page : c'est lui qu'on découvre quand le média se rétracte. */
+.hero-track {
+  position: relative;
+  height: 200vh;
+  height: 200dvh;
+  background: var(--white);
+}
+
+/* Le clip-path est composité : aucun recalcul de mise en page par image.
+   Il n'est posé que sur le média et sur la banderole — jamais sur le texte,
+   qui reste centré, loin des bords, et n'est donc jamais rogné. */
+.hero-media, .hero-marquee { will-change: clip-path; }
 
 .hero__inner {
   flex: 1;
@@ -945,6 +975,10 @@ h1, h2, h3, h4 {
   }
   .marquee-track { animation: none; }
   .demo-hint .i { animation: none; }
+  /* Hero : plein écran figé, et la piste se réduit pour ne pas laisser
+     une hauteur d'écran de défilement sans rien à voir. */
+  .hero-track { height: 100vh; height: 100dvh; }
+  .hero-media, .hero-marquee { clip-path: none !important; will-change: auto; }
   .feat-rail { transition: none; }
   .marquee { overflow-x: auto; }
   .table-row.is-pulsing { animation: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.16); background: var(--g-50); }

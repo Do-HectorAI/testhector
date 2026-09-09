@@ -167,17 +167,30 @@ h1, h2, h3, h4 {
 .hero {
   /* --- Réglages du fond : les quatre curseurs à bouger --- */
   --hero-media-opacity: 1;     /* 0 = fond noir uni, 1 = image à pleine intensité */
-  --hero-media-blur: 0px;      /* 0 = net */
-  --hero-media-veil: 0;        /* voile noir par-dessus : 0 = aucun, .5 = à mi-chemin */
+  --hero-media-blur: 5px;      /* 0 = net */
+  --hero-media-veil: 0;        /* voile noir uniforme : 0 = aucun, .5 = à mi-chemin */
+  --hero-media-halo: .34;      /* halo sombre derrière le titre seulement */
   --hero-media-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
 
   position: relative;
   isolation: isolate;
   background: var(--black);
   color: var(--white);
-  padding: calc(var(--header-h) + 3.5rem) 1.5rem clamp(3.5rem, 6vw, 5.5rem);
+  /* Colonne : le titre occupe l'espace libre et se centre, la banderole
+     reste calée en pied. min-height plutôt que height, pour qu'un texte
+     long ou une grande police ne soit jamais rogné. */
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  padding: calc(var(--header-h) + 2.5rem) 1.5rem 0;
   text-align: center;
   overflow: hidden;
+}
+
+.hero__inner {
+  flex: 1;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 
 .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: var(--black); }
@@ -190,61 +203,121 @@ h1, h2, h3, h4 {
   filter: saturate(var(--hero-media-saturate)) blur(var(--hero-media-blur));
   transform: scale(1.08);
 }
+/* Dégradé de pied : assombrit le bas de l'image, là où passent les logos
+   blancs. Sans lui, une zone claire de l'image les ferait disparaître. */
+.hero-media::before {
+  content: ''; position: absolute; inset: auto 0 0 0; height: 42%; z-index: 1;
+  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.55));
+}
+
 /* Voile dégradé, désactivé par défaut (--hero-media-veil: 0) : l'image se voit
    telle quelle. Les coefficients sont multiplicatifs, donc à 0 le dégradé est
    entièrement transparent ; le remonter assombrit d'abord le haut et le bas. */
 .hero-media::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(
-    rgba(0,0,0,calc(var(--hero-media-veil) * 1.35)) 0%,
-    rgba(0,0,0,var(--hero-media-veil)) 40%,
-    rgba(0,0,0,calc(var(--hero-media-veil) * 1.45)) 100%);
+  background:
+    /* Halo : dense derrière le bloc de titre, nul sur les bords. */
+    radial-gradient(ellipse 66% 42% at 50% 42%,
+      rgba(0,0,0,var(--hero-media-halo)) 0%,
+      rgba(0,0,0,calc(var(--hero-media-halo) * .55)) 52%,
+      rgba(0,0,0,0) 78%),
+    linear-gradient(
+      rgba(0,0,0,calc(var(--hero-media-veil) * 1.35)) 0%,
+      rgba(0,0,0,var(--hero-media-veil)) 40%,
+      rgba(0,0,0,calc(var(--hero-media-veil) * 1.45)) 100%);
 }
 .hero__content { max-width: 60rem; margin-inline: auto; }
 
 .hero__title {
-  font-weight: 700; font-size: clamp(2.1rem, 5.2vw, 3.6rem); margin-bottom: 1.5rem;
-  text-shadow: 0 2px 24px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.5);
+  font-weight: 700; font-size: clamp(2.5rem, 6.4vw, 5rem);
+  line-height: 1.04; letter-spacing: -0.03em; margin-bottom: 1.5rem;
+  text-shadow: 0 2px 30px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.45);
 }
 .hero__subtitle {
-  max-width: 40rem; margin: 0 auto; color: rgba(255,255,255,.92);
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  text-shadow: 0 2px 16px rgba(0,0,0,.7), 0 1px 3px rgba(0,0,0,.5);
+  max-width: 46rem; margin: 0 auto; color: rgba(255,255,255,.95);
+  font-size: clamp(1.0625rem, 1.9vw, 1.4375rem); line-height: 1.5;
+  text-shadow: 0 2px 20px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.45);
 }
 
 .hero__actions {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-  gap: 1rem 1.75rem; margin-top: clamp(2.25rem, 4vw, 3rem);
+  gap: .875rem; margin-top: clamp(2.25rem, 4vw, 3rem);
 }
-
-.app-wrap { max-width: 74rem; margin: clamp(2rem, 4vw, 2.75rem) auto 0; }
-
-/* Intitulé du bloc de démonstration : surtitre en pastille + titre.
-   Comme l'image de fond n'est plus voilée, le contraste est porté par
-   l'ombre portée du titre et par le fond translucide de la pastille. */
-.app-intro { margin: 0 0 1.25rem; }
-
-.app-intro__badge {
-  display: inline-block; margin-bottom: .75rem;
-  padding: .4rem .85rem; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.28); background: rgba(0,0,0,.38);
+/* Pastilles : le second bouton devient un pavé translucide plutôt qu'un lien
+   souligné, pour équilibrer la paire comme sur la référence. */
+.hero__actions .btn { border-radius: 999px; padding: .95rem 2rem; }
+.hero__actions .btn-link {
+  border-bottom: 0; color: var(--white);
+  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  font-family: var(--font-body); font-size: .75rem; font-weight: 700;
-  letter-spacing: .15em; text-transform: uppercase; color: var(--white);
 }
+.hero__actions .btn-link:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
 
-.app-intro__title {
-  margin: 0; font-weight: 700; color: var(--white);
-  font-size: clamp(1.375rem, 2.6vw, 2rem);
-  text-shadow: 0 2px 18px rgba(0,0,0,.65), 0 1px 3px rgba(0,0,0,.5);
+/* --- Banderole de logos, en pied de hero --- */
+.hero-marquee { padding-bottom: clamp(1.75rem, 3vw, 2.75rem); }
+.hero-marquee__label {
+  margin: 0 0 1.25rem;
+  font-size: .75rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+  text-shadow: 0 1px 10px rgba(0,0,0,.6);
 }
+/* Le fond est une image : les fondus latéraux ne peuvent pas être des
+   dégradés vers une couleur. On découpe les bords au masque. */
+.hero-marquee .marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
+}
+.hero-marquee .marquee::before, .hero-marquee .marquee::after { display: none; }
+/* brightness(0) écrase le logo en noir, invert(1) le repasse en blanc :
+   tous les logos sortent en blanc pur, quelle que soit leur couleur d'origine.
+   Cela suppose un fond transparent — les quatre logos qui n'en avaient pas
+   (borzakian, illouz, lavole, proust) sont détourés dans cabinets/mono/,
+   sans quoi ils deviendraient des rectangles blancs pleins.
+   La classe .inv, utile sur fond clair, est neutralisée ici. */
+.hero-marquee .marquee-item img,
+.hero-marquee .marquee-item img.inv {
+  filter: brightness(0) invert(1);
+  opacity: .78;
+}
+.hero-marquee .marquee-item img:hover { opacity: 1; }
+.hero-marquee .marquee-item { height: 4rem; }
+.hero-marquee .marquee-item img { height: 2.5rem; }
+
+.app-wrap { max-width: 74rem; margin-inline: auto; padding-inline: 1.5rem; }
+
+/* --- Section « Démonstration interactive » ---
+   La démonstration a quitté le hero : tout ce qui l'entoure est repassé
+   du blanc-sur-sombre au sombre-sur-clair. */
+.demo { background: var(--g-50); border-bottom: 1px solid var(--g-200); }
+
+/* Indication de départ. Le curseur bat doucement pour signaler qu'il y a
+   quelque chose à cliquer ; l'ensemble s'efface au premier clic. */
+.demo-hint {
+  display: inline-flex; align-items: center; gap: .55rem;
+  margin: -1rem auto clamp(1.5rem, 3vw, 2.25rem);
+  padding: .55rem 1.1rem; border-radius: 999px;
+  border: 1px solid var(--g-300); background: var(--white);
+  font-size: .9375rem; color: var(--g-700);
+  transition: opacity .4s;
+}
+.demo .container { display: flex; flex-direction: column; align-items: center; }
+.demo .section-head { width: 100%; }
+.demo-hint strong { color: var(--ink); }
+.demo-hint .i { font-size: 1.05rem; color: var(--ink); fill: currentColor; stroke-width: 1.2; }
+.demo-hint.is-hidden { opacity: 0; }
+
+@keyframes demo-pointer {
+  0%, 70%, 100% { transform: translate(0, 0); }
+  80%           { transform: translate(2px, 2px); }
+}
+.demo-hint .i { animation: demo-pointer 2.4s ease-in-out infinite; }
 
 /* Navigation simplifiée, mobile uniquement */
 .app-mobile-nav { display: none; gap: .375rem; margin-bottom: .875rem; }
 .app-mobile-nav button {
   flex: 1; padding: .55rem .5rem; border-radius: 6px; cursor: pointer;
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.75); font-size: .75rem; font-weight: 700; line-height: 1.2;
+  background: var(--white); border: 1px solid var(--g-300);
+  color: var(--g-700); font-size: .75rem; font-weight: 700; line-height: 1.2;
 }
 .app-mobile-nav button[aria-selected="true"] { background: var(--white); color: var(--black); border-color: var(--white); }
 
@@ -253,14 +326,16 @@ h1, h2, h3, h4 {
    puis réduite pour tenir dans le hero). --h : hauteur rendue visée. */
 .app {
   --z: 1;
-  --h: clamp(30rem, calc(100vh - 20.5rem), 41.25rem);
+  --h: clamp(30rem, calc(100vh - 14rem), 41.25rem);
   zoom: var(--z);
   height: calc(var(--h) / var(--z));
   display: flex; text-align: left;
   background: var(--g-100);
   color: var(--ink);
   border-radius: 14px;
-  box-shadow: 0 40px 90px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.08);
+  /* Sur fond clair, l'ombre porte l'effet de fenêtre posée ; le filet
+     remplace celui, blanc, qui détachait la fenêtre du hero noir. */
+  box-shadow: 0 30px 70px -28px rgba(0,0,0,.45), 0 0 0 1px var(--g-200);
   overflow: hidden;
 }
 
@@ -607,13 +682,10 @@ h1, h2, h3, h4 {
 /* ---------------------------------------------------------------
    8. Banderole de logos
    --------------------------------------------------------------- */
-/* --marquee-bg : couleur des deux fondus latéraux. Elle doit suivre le fond de
-   la section, sinon les fondus se voient dès que la banderole est déplacée. */
-.marquee-section {
-  --marquee-bg: var(--white);
-  background: var(--marquee-bg);
-  padding-block: clamp(3rem, 5vw, 4rem); border-bottom: 1px solid var(--g-200);
-}
+/* --marquee-bg : couleur des deux fondus latéraux, pour un usage sur fond uni.
+   Dans le hero, le fond est une image : les fondus y passent par un masque
+   (cf. .hero-marquee, section 6). */
+.marquee { --marquee-bg: var(--white); }
 .eyebrow {
   display: inline-block; font-size: .75rem; font-weight: 700;
   letter-spacing: .15em; text-transform: uppercase; color: var(--g-600);
@@ -813,11 +885,11 @@ h1, h2, h3, h4 {
 
   /* Fausse interface : la barre latérale disparaît, navigation simplifiée */
   .header-logo img { height: 1.6rem; }
-  .app-intro__title { font-size: 1.25rem; }
+  .demo-hint { font-size: .875rem; padding: .5rem .9rem; }
   .app-sidebar { display: none; }
   .app-mobile-nav { display: flex; }
   .app-main { padding: .5rem; }
-  .app { --z: .78; --h: clamp(26rem, calc(100vh - 19rem), 34rem); border-radius: 12px; }
+  .app { --z: .78; --h: clamp(26rem, calc(100vh - 13rem), 34rem); border-radius: 12px; }
 
   .footer-top { grid-template-columns: 1fr 1fr; gap: 3rem; }
   .footer-brand { grid-column: 1 / -1; }
@@ -836,7 +908,7 @@ h1, h2, h3, h4 {
   .hero__actions { flex-direction: column; }
   .hero__actions .btn-invert { width: 100%; }
 
-  .app { --z: .66; --h: clamp(24rem, calc(100vh - 17rem), 30rem); }
+  .app { --z: .66; --h: clamp(24rem, calc(100vh - 12rem), 30rem); }
   .pane { padding: .875rem .875rem 0; }
   .pane-head { flex-direction: column; align-items: stretch; gap: .625rem; }
   .pane-toolbar { flex-wrap: wrap; }
@@ -869,6 +941,7 @@ h1, h2, h3, h4 {
     transition-duration: .001ms !important;
   }
   .marquee-track { animation: none; }
+  .demo-hint .i { animation: none; }
   .feat-rail { transition: none; }
   .marquee { overflow-x: auto; }
   .table-row.is-pulsing { animation: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.16); background: var(--g-50); }

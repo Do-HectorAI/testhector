@@ -54,6 +54,7 @@
   <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m8 12 2.8 2.8L16 9.4"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3 7h12M18 7h3M3 17h5M11 17h10"/><circle cx="16.5" cy="7" r="2"/><circle cx="9.5" cy="17" r="2"/></symbol>
   <symbol id="i-canvas" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/><path d="m10 9-2.5 3L10 15"/></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24"><path d="M5.5 3.2 19.2 11.6l-6.1 1.2-2.6 5.6z"/></symbol>
   <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
   <!-- Icône PDF (seule couleur tolérée dans la fausse interface, cf. captures) -->
   <symbol id="i-pdf" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm0 1.8L18.2 8H15a1 1 0 0 1-1-1z"/><path fill="#fff" stroke="none" d="M6.6 13h10.8v5.4H6.6z"/><text x="12" y="17.6" fill="currentColor" stroke="none" font-family="Helvetica,Arial,sans-serif" font-size="4.6" font-weight="700" text-anchor="middle">PDF</text></symbol>
@@ -85,11 +86,9 @@
 <main id="contenu">
 
   <!-- ===================== Hero ===================== -->
+  <!-- Le hero ne porte plus que l'image, le titre et la banderole. La
+       démonstration interactive a sa propre section, juste en dessous. -->
   <section class="hero">
-    <!-- Fond image : flouté et assombri pour ne pas concurrencer la fausse
-         interface. Réglages en haut de la section 6 de style.css.
-         Source haute définition : assets/media/image.jpg — les trois variantes
-         servies ici en sont dérivées (cf. README, « Le fond du hero »). -->
     <div class="hero-media" aria-hidden="true">
       <img id="hero-bg"
            src="assets/img/hero-bg-1920.jpg"
@@ -101,18 +100,70 @@
            alt="" decoding="async" fetchpriority="high" loading="eager" />
     </div>
 
-    <div class="hero__content">
-      <h1 class="hero__title">L’IA des avocats contentieux</h1>
-      <p class="hero__subtitle">Avec Hector, vous traitez vos procédures plus vite&nbsp;: de l’analyse du dossier au dernier jeu de conclusions.</p>
-    </div>
-
-    <!-- ---------- Fausse interface (maquette, aucune donnée réelle) ---------- -->
-    <div class="app-wrap">
-      <div class="app-intro">
-        <span class="app-intro__badge">Interface interactive</span>
-        <h2 class="app-intro__title">Prenez la main sur un dossier réel</h2>
+    <div class="hero__inner">
+      <div class="hero__content">
+        <h1 class="hero__title">L’IA des avocats contentieux</h1>
+        <p class="hero__subtitle">Avec Hector, vous traitez vos procédures plus vite&nbsp;: de l’analyse du dossier au dernier jeu de conclusions.</p>
       </div>
 
+      <div class="hero__actions">
+        <a class="btn btn-invert" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
+        <a class="btn btn-link" href="https://www.hector.legal/comment-ca-marche.html">Voir comment ça marche en détail <svg class="i"><use href="#i-arrow-right"/></svg></a>
+      </div>
+    </div>
+
+    <!-- Banderole en pied de hero : les logos sont ramenés au blanc pur et les
+         fondus latéraux passent par un masque, le fond étant une image. -->
+    <div class="hero-marquee">
+      <p class="hero-marquee__label">Ils nous font confiance</p>
+      <div class="marquee" id="marquee">
+        <div class="marquee-track">
+          <div class="marquee-group">
+            <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="SEA Avocats" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/lavole.png" alt="Cabinet Lavolé" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/borzakian.png" alt="Cabinet Borzakian" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/proust.png" alt="Cabinet Proust" width="240" height="80" /></span>
+            <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="Cabinet SMETH" width="240" height="80" /></span>
+            <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="UJA de Paris" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="Barreau de Paris" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="SaintEx Avocats" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/illouz.png" alt="Illouz Partners" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="Chappel Avocat" width="240" height="80" /></span>
+          </div>
+          <div class="marquee-group" aria-hidden="true">
+            <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/lavole.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/borzakian.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/proust.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/mono/illouz.png" alt="" width="240" height="80" /></span>
+            <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="" width="240" height="80" /></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Démonstration interactive ===================== -->
+  <section class="section demo" id="demo" aria-labelledby="demo-title">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Interface interactive</span>
+        <h2 class="h2" id="demo-title">Prenez la main sur un dossier réel</h2>
+        <p class="lead">Ce n’est pas une vidéo&nbsp;: l’interface ci-dessous est cliquable. Ouvrez un dossier, parcourez ses pièces, lancez une conversation.</p>
+      </div>
+
+      <!-- Indication de départ : s'efface au premier clic (cf. stopPulse dans script.js). -->
+      <p class="demo-hint" id="demo-hint">
+        <svg class="i" aria-hidden="true"><use href="#i-pointer"/></svg>
+        Cliquez sur la ligne <strong>Techinov</strong> pour ouvrir le dossier
+      </p>
+    </div>
+
+    <div class="app-wrap">
       <!-- Navigation simplifiée, mobile uniquement -->
       <div class="app-mobile-nav" role="tablist" aria-label="Écrans de la démonstration">
         <button type="button" role="tab" data-goto="dossiers" aria-selected="true">Dossiers</button>
@@ -311,47 +362,6 @@
           <!-- Éléments flottants, présents sur les trois écrans -->
           <button type="button" class="float-side" aria-label="Ouvrir la fiche" tabindex="-1"><svg class="i"><use href="#i-card"/></svg></button>
           <button type="button" class="float-chat" aria-label="Ouvrir le chat" tabindex="-1"><svg class="i"><use href="#i-chat"/></svg></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ---------- Boutons, sous la fausse interface ---------- -->
-    <div class="hero__actions">
-      <a class="btn btn-invert" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
-      <a class="btn btn-link" href="https://www.hector.legal/comment-ca-marche.html">Voir comment ça marche en détail <svg class="i"><use href="#i-arrow-right"/></svg></a>
-    </div>
-  </section>
-
-  <!-- ===================== Banderole de logos ===================== -->
-  <section class="marquee-section" aria-label="Cabinets qui nous font confiance">
-    <div class="container">
-      <p class="eyebrow eyebrow--center">Ils nous font confiance</p>
-    </div>
-    <div class="marquee" id="marquee">
-      <div class="marquee-track">
-        <div class="marquee-group">
-          <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="SEA Avocats" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/lavole.jpg" alt="Cabinet Lavolé" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/borzakian.webp" alt="Cabinet Borzakian" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/proust.png" alt="Cabinet Proust" width="240" height="80" /></span>
-          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="Cabinet SMETH" width="240" height="80" /></span>
-          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="UJA de Paris" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="Barreau de Paris" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="SaintEx Avocats" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/illouz.jpg" alt="Illouz Partners" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="Chappel Avocat" width="240" height="80" /></span>
-        </div>
-        <div class="marquee-group" aria-hidden="true">
-          <span class="marquee-item"><img src="assets/img/cabinets/sea-avocats.png" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/lavole.jpg" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/borzakian.webp" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/proust.png" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/smeth.png" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img class="inv" src="assets/img/cabinets/uja-paris.webp" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/barreau-paris.svg" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/saintex.png" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/illouz.jpg" alt="" width="240" height="80" /></span>
-          <span class="marquee-item"><img src="assets/img/cabinets/chappel.svg" alt="" width="240" height="80" /></span>
         </div>
       </div>
     </div>

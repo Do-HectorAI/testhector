@@ -121,6 +121,7 @@
     var sideConv = document.getElementById('side-conv');
     var mobileTabs = document.querySelectorAll('.app-mobile-nav [data-goto]');
     var pulsingRow = document.getElementById('row-techinov');
+    var demoHint = document.getElementById('demo-hint');
 
     function showScreen(name) {
       app.setAttribute('data-screen', name);
@@ -142,9 +143,11 @@
       if (name === 'dossier' && piecesEl) piecesEl.scrollTop = 0;
     }
 
-    // Le titre du bloc reste affiché : seul le halo de la ligne s'éteint.
+    // Au premier clic, l'utilisateur a compris que l'interface répond :
+    // le halo de la ligne et l'indication de départ s'effacent.
     function stopPulse() {
       if (pulsingRow) pulsingRow.classList.remove('is-pulsing');
+      if (demoHint) demoHint.classList.add('is-hidden');
     }
 
     // Tout élément porteur de data-goto navigue ; le premier clic

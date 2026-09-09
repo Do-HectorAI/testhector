@@ -736,13 +736,13 @@ h1, h2, h3, h4 {
 }
 .stat-value {
   font-family: var(--font-heading); font-weight: 700; line-height: .95;
-  font-size: clamp(3.5rem, 15vw, 13rem); letter-spacing: -0.04em;
+  font-size: clamp(2.5rem, 8vw, 6.5rem); letter-spacing: -0.035em;
   margin: 0 0 clamp(.75rem, 1.5vw, 1.25rem);
   font-variant-numeric: tabular-nums;
 }
 .stat-label {
   margin: 0; color: var(--g-700);
-  font-size: clamp(1.125rem, 2.4vw, 1.875rem);
+  font-size: clamp(1rem, 1.6vw, 1.3125rem);
 }
 
 /* ---------------------------------------------------------------

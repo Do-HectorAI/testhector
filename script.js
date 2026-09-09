@@ -369,48 +369,83 @@
   }
 
   /* -----------------------------------------------------------------
-     Compteurs animés — démarrent à l'entrée dans le viewport
+     Chiffres : séquence plein écran
+
+     Le bloc est épinglé sur trois hauteurs d'écran, une par chiffre. On
+     mesure la progression sur la section, on la convertit en position
+     continue entre 0 et n-1, et chaque chiffre en déduit son opacité selon
+     sa distance d à cette position :
+
+       |d| <= hold   : pleinement visible
+       hold → fade   : il s'efface
+       |d| >= fade   : invisible
+
+     Avec hold .25 et fade .5, un chiffre a totalement disparu avant que le
+     suivant ne commence à apparaître : à mi-chemin l'écran est vide, ce qui
+     donne bien « il disparaît, puis l'autre apparaît » plutôt qu'un fondu
+     enchaîné. La séquence se rejoue à l'envers en remontant, puisque la
+     position ne dépend que du scroll.
+
+     Seuls transform et opacity sont écrits : aucun recalcul de mise en page.
+     Aucun écouteur de scroll ; un IntersectionObserver démarre et arrête une
+     boucle requestAnimationFrame.
      ----------------------------------------------------------------- */
-  var counters = document.querySelectorAll('[data-count]');
+  var statsSection = document.querySelector('.stats');
 
-  function format(n) {
-    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); // espace fine insécable
-  }
+  if (statsSection && !reduceMotion) {
+    var stats = statsSection.querySelectorAll('.stat');
+    var statCount = stats.length;
 
-  function render(el, value) {
-    el.textContent = (el.getAttribute('data-prefix') || '') + format(value) + (el.getAttribute('data-suffix') || '');
-  }
+    if (statCount > 1) {
+      var statsCss = getComputedStyle(statsSection);
+      function statToken(name, fallback) {
+        var v = parseFloat(statsCss.getPropertyValue(name));
+        return isNaN(v) ? fallback : v;
+      }
+      var HOLD = statToken('--stats-hold', .25);
+      var FADE = statToken('--stats-fade', .5);
+      var RISE = statToken('--stats-rise', 40);
 
-  function animate(el) {
-    var target = parseInt(el.getAttribute('data-count'), 10);
-    if (reduceMotion) { render(el, target); return; }
+      var statsRunning = false;
+      var statsLast = -1;
 
-    var duration = 1600;
-    var start = null;
+      function paintStats() {
+        var span = statsSection.offsetHeight - window.innerHeight;
+        var scrolled = -statsSection.getBoundingClientRect().top;
+        var p = span > 0 ? Math.max(0, Math.min(1, scrolled / span)) : 0;
+        var pos = p * (statCount - 1);
 
-    function step(ts) {
-      if (start === null) start = ts;
-      var p = Math.min((ts - start) / duration, 1);
-      var eased = 1 - Math.pow(1 - p, 3);
-      render(el, Math.round(target * eased));
-      if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-
-  if (counters.length) {
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            animate(entry.target);
-            io.unobserve(entry.target);
+        if (Math.abs(pos - statsLast) > 0.002) {
+          statsLast = pos;
+          for (var i = 0; i < statCount; i++) {
+            var d = pos - i;
+            var t = Math.abs(d);
+            var o = t <= HOLD ? 1 : Math.max(0, 1 - (t - HOLD) / (FADE - HOLD));
+            // Le chiffre monte en sortant et arrive par le bas : la
+            // translation suit le fondu, pas la position, pour qu'il ne
+            // dérive pas pendant qu'il est pleinement visible.
+            var shift = (d > 0 ? -1 : 1) * (1 - o) * RISE;
+            stats[i].style.opacity = o.toFixed(3);
+            stats[i].style.transform = 'translate3d(0,' + shift.toFixed(1) + 'px,0)';
           }
-        });
-      }, { threshold: 0.5 });
-      for (var c = 0; c < counters.length; c++) io.observe(counters[c]);
-    } else {
-      for (var d = 0; d < counters.length; d++) render(counters[d], parseInt(counters[d].getAttribute('data-count'), 10));
+        }
+        if (statsRunning) requestAnimationFrame(paintStats);
+      }
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          var visible = entries[0].isIntersecting;
+          if (visible && !statsRunning) { statsRunning = true; requestAnimationFrame(paintStats); }
+          else if (!visible) { statsRunning = false; }
+        }, { threshold: 0 }).observe(statsSection);
+      } else {
+        statsRunning = true; requestAnimationFrame(paintStats);
+      }
+
+      window.addEventListener('resize', function () {
+        statsLast = -1;
+        if (!statsRunning) paintStats();
+      });
     }
   }
 })();

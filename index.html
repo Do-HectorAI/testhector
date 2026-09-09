@@ -369,23 +369,28 @@
   </section>
 
   <!-- ===================== Chiffres ===================== -->
-  <section class="section stats-section" aria-label="Chiffres clés">
-    <div class="container">
-      <div class="stats-grid" id="stats">
+  <!-- Séquence plein écran : une hauteur d'écran par chiffre. Le bloc est
+       épinglé et les trois chiffres se relaient en fondu, pilotés par la
+       position de scroll. Chacun s'efface complètement avant que le suivant
+       n'apparaisse, et la séquence se rejoue à l'envers en remontant.
+       Voir la section 7 de style.css et le bloc « Chiffres » de script.js. -->
+  <section class="stats" aria-label="Chiffres clés">
+    <div class="stats-sticky">
+      <div class="stats-stage" id="stats">
         <!-- TODO à trancher : valeurs reprises de la section « chiffres » de hector.legal
              le 25/08/2026 (12 h / 344 / 270 000). Le hero du site actuel annonce des valeurs
              différentes : « 344+ cabinets · 266 000+ actes générés ». -->
-        <div class="stat">
-          <div class="stat-value" data-count="12" data-prefix="+ de " data-suffix=" h">+ de 0 h</div>
-          <div class="stat-label">gagnées par semaine</div>
+        <div class="stat" data-stat="0">
+          <p class="stat-value">+ de 12&nbsp;h</p>
+          <p class="stat-label">gagnées par semaine</p>
         </div>
-        <div class="stat">
-          <div class="stat-value" data-count="344" data-prefix="+ de ">+ de 0</div>
-          <div class="stat-label">cabinets accompagnés</div>
+        <div class="stat" data-stat="1">
+          <p class="stat-value">+ de 344</p>
+          <p class="stat-label">cabinets accompagnés</p>
         </div>
-        <div class="stat">
-          <div class="stat-value" data-count="270000" data-prefix="+ de ">+ de 0</div>
-          <div class="stat-label">actes rédigés</div>
+        <div class="stat" data-stat="2">
+          <p class="stat-value">+ de 270&#8239;000</p>
+          <p class="stat-label">actes rédigés</p>
         </div>
       </div>
     </div>

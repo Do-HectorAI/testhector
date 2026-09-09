@@ -272,6 +272,40 @@
   }
 
   /* -----------------------------------------------------------------
+     Apparition au scroll
+
+     Les éléments marqués data-reveal apparaissent une fois, à leur entrée
+     dans le viewport : opacité et légère montée, avec une cascade entre
+     éléments voisins. On retire l'observation après coup — l'effet ne se
+     rejoue pas si l'on remonte.
+
+     La classe .js-reveal est posée ici : sans JavaScript, la règle qui
+     masque les éléments ne s'applique jamais et le contenu reste visible.
+     ----------------------------------------------------------------- */
+  var toReveal = document.querySelectorAll('[data-reveal]');
+
+  if (toReveal.length && !reduceMotion && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('js-reveal');
+
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        // Cascade : le rang au sein du parent donne le retard.
+        var rank = 0, sib = el;
+        while ((sib = sib.previousElementSibling)) {
+          if (sib.hasAttribute('data-reveal')) rank++;
+        }
+        el.style.transitionDelay = (rank * 90) + 'ms';
+        el.classList.add('is-in');
+        revealObserver.unobserve(el);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    for (var r = 0; r < toReveal.length; r++) revealObserver.observe(toReveal[r]);
+  }
+
+  /* -----------------------------------------------------------------
      Vidéo de la démonstration : pas de lecture automatique si
      l'utilisateur limite les animations. Les contrôles restent là.
      ----------------------------------------------------------------- */

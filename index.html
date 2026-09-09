@@ -211,10 +211,10 @@
        d'écran, sans sortir du DOM — c'est ce qui permet le glissement. -->
   <section class="section features" id="fonctionnalites" aria-labelledby="features-title">
     <div class="container">
-      <h2 class="sr-only" id="features-title">Fonctionnalités</h2>
-
       <div class="section-head">
-        <p class="lead">Hector accompagne le contentieux de bout en bout&nbsp;: analyser un dossier, rédiger un acte et gérer vos affaires au quotidien. Cliquez sur un point pour en savoir plus.</p>
+        <span class="eyebrow">Ce que fait Hector</span>
+        <h2 class="h2" id="features-title">Un compagnon pour chaque temps du contentieux</h2>
+        <p class="lead">De la pile de pièces au jeu de conclusions déposé, Hector suit la procédure dans l’ordre où vous la traitez.</p>
       </div>
 
       <div class="features-carousel" id="features-carousel">
@@ -248,8 +248,11 @@
                 <span class="feat-card__more">Gérez votre contentieux <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
               </div>
               <div class="feat-card__media">
-                <img src="assets/img/fonctionnalites/organiser.jpg" alt="Écran d’Hector affichant la liste des dossiers du cabinet"
-                     width="1600" height="918" loading="lazy" decoding="async" />
+                <!-- Emplacement de la vidéo « Organisez ». À remplacer par :
+                     <video src="assets/media/fonctionnalites/organiser.mp4" poster="…"
+                            width="1600" height="918" autoplay muted loop playsinline
+                            preload="metadata" aria-label="…"></video> -->
+                <div class="media-placeholder" aria-hidden="true"></div>
               </div>
             </article>
 
@@ -262,8 +265,11 @@
                 <span class="feat-card__more">Analysez vos dossiers <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
               </div>
               <div class="feat-card__media">
-                <img src="assets/img/fonctionnalites/analyser.jpg" alt="Écran d’Hector affichant le détail d’un dossier et ses pièces"
-                     width="1600" height="918" loading="lazy" decoding="async" />
+                <!-- Emplacement de la vidéo « Analysez ». À remplacer par :
+                     <video src="assets/media/fonctionnalites/analyser.mp4" poster="…"
+                            width="1600" height="918" autoplay muted loop playsinline
+                            preload="metadata" aria-label="…"></video> -->
+                <div class="media-placeholder" aria-hidden="true"></div>
               </div>
             </article>
 
@@ -276,8 +282,11 @@
                 <span class="feat-card__more">Rédigez vos actes <svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
               </div>
               <div class="feat-card__media">
-                <img src="assets/img/fonctionnalites/rediger.jpg" alt="Écran d’Hector affichant une nouvelle conversation de rédaction"
-                     width="1600" height="918" loading="lazy" decoding="async" />
+                <!-- Emplacement de la vidéo « Rédigez ». À remplacer par :
+                     <video src="assets/media/fonctionnalites/rediger.mp4" poster="…"
+                            width="1600" height="918" autoplay muted loop playsinline
+                            preload="metadata" aria-label="…"></video> -->
+                <div class="media-placeholder" aria-hidden="true"></div>
               </div>
             </article>
 
@@ -287,29 +296,13 @@
     </div>
   </section>
 
-  <!-- ===================== Mieux conclure, plus rapidement ===================== -->
-  <section class="section demo-videos">
-    <div class="container">
-      <div class="section-head">
-        <h2 class="h2">Mieux conclure, plus rapidement</h2>
-        <p class="lead">Hector prend en charge les tâches les plus chronophages pour vous permettre de vous concentrer sur la valeur de votre expertise : affiner l’argumentation, définir la stratégie et accompagner vos clients.</p>
-      </div>
-      <article class="video-card">
-        <video src="assets/media/mieux-conclure.mp4" preload="metadata" controls autoplay muted loop playsinline aria-label="Démonstration du fonctionnement d’Hector"></video>
-        <div class="video-card__foot">
-          <a class="btn btn-solid" href="https://www.hector.legal/reserver" target="_blank" rel="noopener">Réserver une démo</a>
-        </div>
-      </article>
-    </div>
-  </section>
-
   <!-- ===================== Sécurité & confidentialité ===================== -->
   <section class="section security">
     <div class="container">
       <div class="section-head section-head--left">
-        <span class="eyebrow">Sécurité &amp; confidentialité</span>
-        <h2 class="h2">Le secret professionnel n’est pas une option.</h2>
-        <p class="lead">Hector est conçu pour les exigences déontologiques de l’avocat. Vos données ne quittent jamais un environnement maîtrisé.</p>
+        <span class="eyebrow" data-reveal>Sécurité &amp; confidentialité</span>
+        <h2 class="h2" data-reveal>Le secret professionnel n’est pas une option.</h2>
+        <p class="lead" data-reveal>Hector est conçu pour les exigences déontologiques de l’avocat. Vos données ne quittent jamais un environnement maîtrisé.</p>
       </div>
       <ul class="check-list">
         <li>Vos données ne sont jamais utilisées pour entraîner nos modèles</li>

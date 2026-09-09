@@ -799,14 +799,6 @@ h1, h2, h3, h4 {
 .section-head .h2 { margin-bottom: 1.5rem; }
 .section-head .eyebrow { margin-bottom: .75rem; }
 
-.demo-videos { background: var(--g-50); }
-.video-card {
-  max-width: 64rem; margin-inline: auto; overflow: hidden;
-  border: 1px solid var(--g-200); border-radius: var(--radius); background: var(--white);
-}
-.video-card video { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: var(--black); }
-.video-card__foot { display: flex; justify-content: center; padding: 2rem 1.5rem; }
-
 .security { background: var(--black); color: var(--white); }
 .security .eyebrow { color: rgba(255,255,255,.6); }
 
@@ -900,7 +892,25 @@ h1, h2, h3, h4 {
 .feat-card:hover .feat-card__more .i { transform: translateX(3px); }
 
 .feat-card__media { overflow: hidden; border-radius: var(--radius); border: 1px solid var(--g-200); }
-.feat-card__media img { width: 100%; height: auto; }
+.feat-card__media img,
+.feat-card__media video { display: block; width: 100%; height: auto; }
+/* Écran vide en attendant les vidéos. Le ratio reprend celui des captures
+   (1600 x 918), pour que la carte ne change pas de hauteur au remplacement. */
+.media-placeholder { aspect-ratio: 1600 / 918; background: var(--g-100); }
+
+/* ---------------------------------------------------------------
+   9 ter. Apparition au scroll
+   --------------------------------------------------------------- */
+/* Les éléments marqués data-reveal montent de quelques pixels en apparaissant,
+   une seule fois. L'état masqué n'est appliqué que si le JS a pris la main
+   (.js-reveal sur <html>) : sans JavaScript, tout reste visible. */
+.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity .55s cubic-bezier(.22,.61,.36,1),
+              transform .55s cubic-bezier(.22,.61,.36,1);
+}
+.js-reveal [data-reveal].is-in { opacity: 1; transform: none; }
 
 /* ---------------------------------------------------------------
    10. Pied de page
@@ -1018,6 +1028,8 @@ h1, h2, h3, h4 {
   .demo-hint .i { animation: none; }
   /* Hero : plein écran figé, aucun effet lié au scroll. */
   .hero-media, .hero-marquee { clip-path: none !important; will-change: auto; }
+  /* Apparitions : tout est visible d'emblée. */
+  .js-reveal [data-reveal] { opacity: 1 !important; transform: none !important; transition: none; }
   /* Chiffres : les trois se suivent normalement, sans épinglage ni fondu. */
   .stats { height: auto; }
   .stats-sticky { position: static; height: auto; padding-block: clamp(4.5rem, 8vw, 7rem); }

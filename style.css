@@ -167,7 +167,7 @@ h1, h2, h3, h4 {
 .hero {
   /* --- Réglages du fond : les quatre curseurs à bouger --- */
   --hero-media-opacity: 1;     /* 0 = fond noir uni, 1 = image à pleine intensité */
-  --hero-media-blur: 3px;      /* 0 = net */
+  --hero-media-blur: 0px;      /* 0 = net */
   --hero-media-veil: 0;        /* voile noir uniforme : 0 = aucun, .5 = à mi-chemin */
   --hero-media-halo: .38;      /* halo sombre derrière le titre seulement */
   --hero-media-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
@@ -247,6 +247,9 @@ h1, h2, h3, h4 {
    pour équilibrer la paire. Rayon repris des boutons du reste du site. */
 .hero__actions .btn { padding: .95rem 2rem; }
 .hero__actions .btn-link {
+  /* .btn-link remet border-radius à 0 pour son usage « lien souligné » :
+     il faut donc le rétablir ici, sinon ce bouton seul reste à angles vifs. */
+  border-radius: 6px;
   border-bottom: 0; color: var(--white);
   background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);

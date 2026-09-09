@@ -316,6 +316,15 @@ h1, h2, h3, h4 {
 
 .app-wrap { max-width: 74rem; margin-inline: auto; padding-inline: 1.5rem; }
 
+/* Cadre de la vidéo de démonstration : reprend le rayon, le filet et l'ombre
+   qui donnaient à la fausse interface son allure de fenêtre posée. */
+.demo-video {
+  overflow: hidden; border-radius: 14px;
+  border: 1px solid var(--g-200); background: var(--g-100);
+  box-shadow: 0 30px 70px -28px rgba(0,0,0,.45);
+}
+.demo-video video { display: block; width: 100%; height: auto; }
+
 /* --- Section « Démonstration interactive » ---
    La démonstration a quitté le hero : tout ce qui l'entoure est repassé
    du blanc-sur-sombre au sombre-sur-clair. */

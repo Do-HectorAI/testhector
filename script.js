@@ -272,6 +272,17 @@
   }
 
   /* -----------------------------------------------------------------
+     Vidéo de la démonstration : pas de lecture automatique si
+     l'utilisateur limite les animations. Les contrôles restent là.
+     ----------------------------------------------------------------- */
+  var demoVideo = document.querySelector('.demo-video video');
+  if (demoVideo && reduceMotion) {
+    demoVideo.removeAttribute('autoplay');
+    demoVideo.autoplay = false;
+    demoVideo.pause();
+  }
+
+  /* -----------------------------------------------------------------
      En-tête : opaque une fois le hero dépassé
      ----------------------------------------------------------------- */
   var header = document.getElementById('site-header');

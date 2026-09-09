@@ -63,11 +63,37 @@ assets/
     fonctionnalites/      Les 3 visuels du carrousel, dérivés de refs/
   media/
     image.jpg             Source haute définition du fond du hero (2816 px, non servie)
+    demo-hector.mp4       Démonstration de l'application (cf. « La vidéo de la démo »)
     hero.mp4              Ancien fond vidéo du hero — conservé, plus utilisé par la page
     mieux-conclure.mp4    Vidéo de la section « Mieux conclure, plus rapidement »
 refs/                   Les trois captures de la vraie application (référence)
 PROMPT.md               Le brief d’origine
 ```
+
+---
+
+## La vidéo de la démo
+
+`assets/media/demo-hector.mp4` est un enregistrement d'écran de l'application
+réelle. La source (122 Mo, 3420 × 2214, 60 i/s) n'est pas versionnée.
+
+Deux traitements sont appliqués : un rognage de **248 px en haut**, qui retire la
+barre d'adresse et la barre de favoris du navigateur — 248 px est la ligne exacte
+où commence l'application —, et un ré-encodage pour le web.
+
+```bash
+ffmpeg -i "<enregistrement source>.mov" \
+  -vf "crop=3420:1966:0:248,scale=1600:-2,fps=30" \
+  -c:v libx264 -crf 26 -preset slow -pix_fmt yuv420p \
+  -movflags +faststart -an \
+  assets/media/demo-hector.mp4
+
+# affiche, prise à 2 s
+ffmpeg -ss 2 -i assets/media/demo-hector.mp4 -frames:v 1 -q:v 4 assets/img/demo-poster.jpg
+```
+
+122 Mo → 2,8 Mo. Pas de piste audio, `faststart` pour que la lecture démarre
+avant la fin du téléchargement.
 
 ---
 

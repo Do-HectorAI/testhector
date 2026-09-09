@@ -167,9 +167,9 @@ h1, h2, h3, h4 {
 .hero {
   /* --- Réglages du fond : les quatre curseurs à bouger --- */
   --hero-media-opacity: 1;     /* 0 = fond noir uni, 1 = image à pleine intensité */
-  --hero-media-blur: 5px;      /* 0 = net */
+  --hero-media-blur: 3px;      /* 0 = net */
   --hero-media-veil: 0;        /* voile noir uniforme : 0 = aucun, .5 = à mi-chemin */
-  --hero-media-halo: .34;      /* halo sombre derrière le titre seulement */
+  --hero-media-halo: .38;      /* halo sombre derrière le titre seulement */
   --hero-media-saturate: 1;    /* 0 = noir et blanc, 1 = couleurs d'origine */
 
   position: relative;
@@ -243,9 +243,9 @@ h1, h2, h3, h4 {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
   gap: .875rem; margin-top: clamp(2.25rem, 4vw, 3rem);
 }
-/* Pastilles : le second bouton devient un pavé translucide plutôt qu'un lien
-   souligné, pour équilibrer la paire comme sur la référence. */
-.hero__actions .btn { border-radius: 999px; padding: .95rem 2rem; }
+/* Le second bouton devient un pavé translucide plutôt qu'un lien souligné,
+   pour équilibrer la paire. Rayon repris des boutons du reste du site. */
+.hero__actions .btn { padding: .95rem 2rem; }
 .hero__actions .btn-link {
   border-bottom: 0; color: var(--white);
   background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);

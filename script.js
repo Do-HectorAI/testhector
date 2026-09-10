@@ -110,165 +110,296 @@
   }
 
   /* -----------------------------------------------------------------
-     Navigation entre les trois écrans
+     Scène : écran fixe, contenu piloté au scroll
+
+     ── LA TIMELINE ──────────────────────────────────────────────────
+     Tout le déroulé est décrit dans SEQUENCES ci-dessous. Chaque étape
+     porte sa position `at` (0 à 1 dans sa séquence) et, si elle dure,
+     sa `span`. On réordonne, retime ou ajoute une étape en modifiant
+     ces données : la mécanique plus bas n'a pas à changer.
+
+       at    quand l'étape commence, en part de la séquence
+       span  sa durée, pour les effets continus
+       on    blocs à allumer          off  blocs à éteindre
+       type  frappe progressive       list révélation ligne à ligne
+       pct   progression [de, à]      phase pastille active
+       press pression du bouton       cursor déplacement du curseur
+       view  vue affichée             scroll défilement d'une liste
+
+     ── POURQUOI UN REJEU COMPLET ────────────────────────────────────
+     À chaque changement, on remet la scène à zéro puis on rejoue toutes
+     les étapes jusqu'à la position courante. L'état ne dépend donc que
+     du scroll, jamais du chemin parcouru : remonter puis redescendre
+     redonne exactement la même image.
      ----------------------------------------------------------------- */
-  var app = document.getElementById('app');
 
-  if (app) {
-    var screens = app.querySelectorAll('.screen');
-    var sideDossiers = document.getElementById('side-dossiers');
-    var sideLabel = document.getElementById('side-label');
-    var sideConv = document.getElementById('side-conv');
-    var mobileTabs = document.querySelectorAll('.app-mobile-nav [data-goto]');
-    var pulsingRow = document.getElementById('row-techinov');
-    var demoHint = document.getElementById('demo-hint');
+  var MSG_1 = 'LOGISTRANS nous assigne en paiement de ses trois factures. Prépare les conclusions en défense pour TECHINNOV, avec une demande reconventionnelle au titre de la rétention.';
+  var MSG_2 = 'Le plan me convient. Rédige les conclusions en défense complètes à partir de ce plan.';
 
-    function showScreen(name) {
-      app.setAttribute('data-screen', name);
-
-      for (var i = 0; i < screens.length; i++) {
-        screens[i].hidden = screens[i].getAttribute('data-name') !== name;
-      }
-
-      // Barre latérale : états actifs selon l'écran, cf. captures
-      sideDossiers.classList.toggle('is-active', name === 'dossiers');
-      sideLabel.textContent = name === 'dossier' ? 'Dans ce dossier' : 'Mes conversations';
-      sideConv.classList.toggle('is-active', name === 'dossier');
-
-      for (var j = 0; j < mobileTabs.length; j++) {
-        mobileTabs[j].setAttribute('aria-selected', String(mobileTabs[j].getAttribute('data-goto') === name));
-      }
-
-      // La liste des pièces repart du haut
-      if (name === 'dossier' && piecesEl) piecesEl.scrollTop = 0;
+  var SEQUENCES = [
+    {
+      id: 'rediger',
+      phrase: 'Du dossier au plan détaillé, argumenté et sourcé.',
+      steps: [
+        { at: 0,    view: 'conversation', on: ['welcome'] },
+        { at: .05,  span: .19, type: MSG_1 },
+        { at: .25,  press: true },
+        { at: .28,  off: ['welcome'], on: ['thread', 'sent'] },
+        { at: .34,  on: ['reply'] },
+        { at: .40,  on: ['prog', 'working'], phase: 'arguments' },
+        { at: .40,  span: .46, pct: [10, 100] },
+        { at: .46,  off: ['working'], on: ['args'], span: .12, list: 'arg' },
+        { at: .58,  phase: 'jp', on: ['jp'], span: .16, list: 'jp' },
+        { at: .74,  phase: 'synthese' },
+        { at: .80,  phase: 'insertion' },
+        { at: .86,  phase: 'done', on: ['canvas'] },
+        { at: .90,  on: ['attach'] },
+        { at: .94,  on: ['final'] },
+        { at: .96,  span: .04, type: MSG_2 }
+      ]
+    },
+    {
+      id: 'organiser',
+      phrase: 'Vos pièces numérotées, classées, prêtes à verser.',
+      steps: [
+        { at: 0,    view: 'dossiers' },
+        { at: .14,  cursor: '#row-techinov' },
+        { at: .34,  cursor: '#row-techinov', press: true },
+        { at: .40,  view: 'dossier' },
+        { at: .55,  span: .45, scroll: ['#pieces', 0, .75] }
+      ]
     }
+  ];
 
-    // Au premier clic, l'utilisateur a compris que l'interface répond :
-    // le halo de la ligne et l'indication de départ s'effacent.
-    function stopPulse() {
-      if (pulsingRow) pulsingRow.classList.remove('is-pulsing');
-      if (demoHint) demoHint.classList.add('is-hidden');
-    }
+  /* ── Mécanique ──────────────────────────────────────────────────── */
+  var stage = document.getElementById('stage');
+  var stageApp = document.getElementById('app');
 
-    // Tout élément porteur de data-goto navigue ; le premier clic
-    // n'importe où dans la fenêtre éteint l'indication visuelle.
-    app.addEventListener('click', function (e) {
-      stopPulse();
-      var target = e.target.closest('[data-goto]');
-      if (target && app.contains(target)) showScreen(target.getAttribute('data-goto'));
-    });
+  if (stage && stageApp) {
+    var desk = document.getElementById('stage-screen');
+    var cursor = document.getElementById('sim-cursor');
+    var phraseEl = stage.querySelector('[data-phrase]');
+    var stepBtns = stage.querySelectorAll('.stage-step');
+    var typedEl = stageApp.querySelector('[data-typed]');
+    var sendBtn = stageApp.querySelector('[data-send]');
+    var fillEl = stageApp.querySelector('[data-fill]');
+    var pctEl = stageApp.querySelector('[data-pct]');
+    var views = stageApp.querySelectorAll('[data-view]');
+    var onBlocks = stageApp.querySelectorAll('[data-on]');
+    var phasePills = stageApp.querySelectorAll('.prog-step');
+    var args = stageApp.querySelectorAll('.arg');
+    var jps = stageApp.querySelectorAll('.jp');
+    var piecesBox = stageApp.querySelector('#pieces');
 
-    for (var k = 0; k < mobileTabs.length; k++) {
-      mobileTabs[k].addEventListener('click', function () {
-        stopPulse();
-        showScreen(this.getAttribute('data-goto'));
-      });
-    }
+    var PHASES = ['arguments', 'jp', 'synthese', 'insertion'];
+    var seqCount = SEQUENCES.length;
 
-    showScreen('dossiers');
-
-    // Les éléments décoratifs restent survolables mais sortent du parcours
-    // clavier : seuls les quatre chemins de navigation sont tabulables.
-    var decorative = app.querySelectorAll('button:not([data-goto])');
-    for (var t = 0; t < decorative.length; t++) decorative[t].setAttribute('tabindex', '-1');
-
-    /* --- Suggestion qui tourne lentement (écran C) --- */
-    var suggestionEl = document.getElementById('ask-suggestion');
-    if (suggestionEl && !reduceMotion) {
-      var idx = 0;
-      setInterval(function () {
-        if (app.getAttribute('data-screen') !== 'conversation') return;
-        suggestionEl.classList.add('is-fading');
-        setTimeout(function () {
-          idx = (idx + 1) % SUGGESTIONS.length;
-          suggestionEl.textContent = SUGGESTIONS[idx];
-          suggestionEl.classList.remove('is-fading');
-        }, 400);
-      }, 4000);
-    }
-  }
-
-  /* -----------------------------------------------------------------
-     Hero : le média se rétracte sur les côtés au scroll
-
-     Le hero est une section normale : la page défile comme partout ailleurs,
-     rien n'est épinglé. On mesure simplement la part du hero déjà passée
-     au-dessus du viewport, et on n'agit que sur sa seconde moitié :
-
-       0 → 50 % défilé   : rien ne bouge, image pleine largeur
-       50 → 100 % défilé : les côtés se rétractent et les coins s'arrondissent
-
-     La valeur ne dépend que de la position de scroll, jamais du sens : en
-     remontant, l'image se ré-étend d'elle-même.
-
-     Seul clipPath est écrit, donc aucun recalcul de mise en page par image.
-     Aucun écouteur de scroll : un IntersectionObserver démarre et arrête une
-     boucle requestAnimationFrame, active seulement hero à l'écran.
-     Réglages : jetons --hero-clip-* en tête de la section 6 de style.css.
-     ----------------------------------------------------------------- */
-  var heroEl = document.querySelector('.hero');
-
-  if (heroEl && !reduceMotion &&
-      window.CSS && CSS.supports && CSS.supports('clip-path', 'inset(1px round 1px)')) {
-    var clipped = [heroEl.querySelector('.hero-media'), heroEl.querySelector('.hero-marquee')];
-    var heroCss = getComputedStyle(heroEl);
-
-    function token(name, fallback) {
-      var v = parseFloat(heroCss.getPropertyValue(name));
+    function css(name, fallback) {
+      var v = parseFloat(getComputedStyle(stage).getPropertyValue(name));
       return isNaN(v) ? fallback : v;
     }
-    // clamp(min, vw, max) reconstruit en JS : getComputedStyle ne résout pas
-    // les clamp() écrits dans une propriété personnalisée.
-    function clampVw(min, vw, max) {
-      return Math.max(min, Math.min(vw * window.innerWidth / 100, max));
+    var SEQ_H = css('--stage-seq-h', 130);   // vh de piste par séquence
+    var RUN = css('--stage-run', .78);       // part jouée, le reste est un palier
+
+    stage.style.height = (seqCount * SEQ_H) + 'vh';
+
+    /* Remise à zéro : la scène ne garde aucune trace de l'étape précédente. */
+    function reset() {
+      for (var i = 0; i < onBlocks.length; i++) onBlocks[i].classList.remove('is-on');
+      for (var v = 0; v < views.length; v++) views[v].hidden = true;
+      for (var p = 0; p < phasePills.length; p++) phasePills[p].className = 'prog-step';
+      for (var a = 0; a < args.length; a++) args[a].classList.remove('is-on');
+      for (var j = 0; j < jps.length; j++) jps[j].className = 'jp';
+      if (typedEl) { typedEl.textContent = ''; typedEl.classList.remove('is-typing'); }
+      if (sendBtn) sendBtn.classList.remove('is-press');
+      if (fillEl) fillEl.style.transform = 'scaleX(0)';
+      if (pctEl) pctEl.textContent = '10 %';
+      if (cursor) cursor.classList.remove('is-on');
+      if (piecesBox) piecesBox.scrollTop = 0;
     }
 
-    var xMin = token('--hero-clip-x-min', 16), xVw = token('--hero-clip-x-vw', 5), xMax = token('--hero-clip-x-max', 76);
-    var rMin = token('--hero-clip-r-min', 16), rVw = token('--hero-clip-r-vw', 2), rMax = token('--hero-clip-r-max', 32);
-    var yMax = token('--hero-clip-y-max', 0);
-    var startFrac = token('--hero-clip-start', .5);
-    var runFrac = token('--hero-clip-run', .5);
+    function block(name, on) {
+      var el = stageApp.querySelector('[data-on="' + name + '"]');
+      if (el) el.classList.toggle('is-on', on !== false);
+    }
 
-    var running = false;
-    var last = -1;
+    function moveCursor(sel, pressed) {
+      if (!cursor || !desk) return;
+      var t = stageApp.querySelector(sel);
+      if (!t) return;
+      var a = t.getBoundingClientRect(), b = desk.getBoundingClientRect();
+      var x = a.left - b.left + a.width * .38;
+      var y = a.top - b.top + a.height * .5;
+      cursor.classList.add('is-on');
+      cursor.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px) scale(' + (pressed ? .78 : 1) + ')';
+    }
 
-    function paintHero() {
-      var h = heroEl.offsetHeight;
-      var scrolled = -heroEl.getBoundingClientRect().top;
-      var begin = startFrac * h;          // rien avant la mi-hauteur
-      var span = runFrac * h;             // durée de la rétraction
-      var p = span > 0 ? (scrolled - begin) / span : 0;
-      p = Math.max(0, Math.min(1, p));
-      var eased = 1 - Math.pow(1 - p, 3); // ease-out cubique
+    /* Rejoue toutes les étapes jusqu'à la position p de la séquence. */
+    function render(seq, p) {
+      reset();
+      var steps = seq.steps;
 
-      if (Math.abs(eased - last) > 0.001) {
-        last = eased;
-        var x = (clampVw(xMin, xVw, xMax) * eased).toFixed(1);
-        var y = (yMax * eased).toFixed(1);
-        var r = (clampVw(rMin, rVw, rMax) * eased).toFixed(1);
-        clipped[0].style.clipPath = 'inset(' + y + 'px ' + x + 'px ' + y + 'px ' + x + 'px round ' + r + 'px)';
-        // La banderole suit la marge latérale mais pas l'arrondi : ses logos
-        // déborderaient sinon du panneau, sur le fond clair de la page.
-        if (clipped[1]) clipped[1].style.clipPath = 'inset(0px ' + x + 'px 0px ' + x + 'px)';
+      for (var i = 0; i < steps.length; i++) {
+        var st = steps[i];
+        if (p < st.at) continue;
+        var t = st.span ? Math.max(0, Math.min(1, (p - st.at) / st.span)) : 1;
+
+        if (st.view) {
+          for (var v = 0; v < views.length; v++) {
+            views[v].hidden = views[v].getAttribute('data-view') !== st.view;
+          }
+        }
+        if (st.off) for (var o = 0; o < st.off.length; o++) block(st.off[o], false);
+        if (st.on) for (var n = 0; n < st.on.length; n++) block(st.on[n], true);
+
+        if (st.type && typedEl) {
+          var cut = Math.round(t * st.type.length);
+          typedEl.textContent = st.type.slice(0, cut);
+          typedEl.classList.toggle('is-typing', t < 1);
+        }
+        if (st.press && sendBtn) sendBtn.classList.toggle('is-press', t < 1);
+
+        if (st.pct) {
+          var val = Math.round(st.pct[0] + (st.pct[1] - st.pct[0]) * t);
+          if (fillEl) fillEl.style.transform = 'scaleX(' + (val / 100).toFixed(3) + ')';
+          if (pctEl) pctEl.textContent = val + ' %';
+        }
+        if (st.phase) {
+          var idx = PHASES.indexOf(st.phase);
+          for (var q = 0; q < phasePills.length; q++) {
+            phasePills[q].className = 'prog-step' +
+              (idx < 0 || q < idx ? ' is-done' : (q === idx ? ' is-active' : ''));
+          }
+        }
+        if (st.list === 'arg') {
+          var na = Math.round(t * args.length);
+          for (var k = 0; k < args.length; k++) args[k].classList.toggle('is-on', k < na);
+        }
+        if (st.list === 'jp') {
+          var nj = t * jps.length;
+          for (var m = 0; m < jps.length; m++) {
+            jps[m].className = 'jp' + (m < Math.floor(nj) ? ' is-done' : (m < nj + 1 ? ' is-searching' : ''));
+            var stateEl = jps[m].querySelector('.jp-state');
+            if (stateEl) stateEl.textContent = m < Math.floor(nj) ? 'Recherche terminée' : 'Recherche en cours…';
+          }
+        }
+        if (st.cursor) moveCursor(st.cursor, !!st.press);
+        if (st.scroll) {
+          var box = stageApp.querySelector(st.scroll[0]);
+          if (box) {
+            var span = box.scrollHeight - box.clientHeight;
+            box.scrollTop = span * (st.scroll[1] + (st.scroll[2] - st.scroll[1]) * t);
+          }
+        }
       }
-      if (running) requestAnimationFrame(paintHero);
     }
 
+    /* ── Pilotage au scroll ──────────────────────────────────────── */
+    var lastKey = '';
+    var stageRunning = false;
+    var activeSeq = -1;
+
+    function paintStage() {
+      var span = stage.offsetHeight - window.innerHeight;
+      var scrolled = -stage.getBoundingClientRect().top;
+      var g = span > 0 ? Math.max(0, Math.min(1, scrolled / span)) : 0;
+
+      var raw = g * seqCount;
+      var idx = Math.min(seqCount - 1, Math.floor(raw));
+      var local = Math.min(1, (raw - idx) / RUN);   // le reste de la séquence est un palier
+
+      // Signature : on ne repeint que si l'image change vraiment.
+      var key = idx + ':' + Math.round(local * 400);
+      if (key !== lastKey) {
+        lastKey = key;
+        render(SEQUENCES[idx], local);
+        if (idx !== activeSeq) {
+          activeSeq = idx;
+          for (var b = 0; b < stepBtns.length; b++) {
+            var on = b === idx;
+            stepBtns[b].classList.toggle('is-active', on);
+            stepBtns[b].setAttribute('aria-selected', String(on));
+            if (on) stepBtns[b].setAttribute('aria-current', 'step');
+            else stepBtns[b].removeAttribute('aria-current');
+          }
+          if (phraseEl) {
+            phraseEl.classList.add('is-swapping');
+            setTimeout(function () {
+              phraseEl.textContent = SEQUENCES[activeSeq].phrase;
+              phraseEl.classList.remove('is-swapping');
+            }, 200);
+          }
+        }
+      }
+      if (stageRunning) requestAnimationFrame(paintStage);
+    }
+
+    // Une seule boucle à la fois : l'observateur l'amorce et l'arrête.
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
-        var visible = entries[0].isIntersecting;
-        if (visible && !running) { running = true; requestAnimationFrame(paintHero); }
-        else if (!visible) { running = false; }
-      }, { threshold: 0 }).observe(heroEl);
-    } else {
-      running = true; requestAnimationFrame(paintHero);
+        var vis = entries[0].isIntersecting;
+        if (vis && !stageRunning && !reduceMotion) {
+          stageRunning = true;
+          requestAnimationFrame(paintStage);
+        } else if (!vis) {
+          stageRunning = false;
+        }
+      }, { threshold: 0 }).observe(stage);
+    } else if (!reduceMotion) {
+      stageRunning = true;
+      requestAnimationFrame(paintStage);
     }
 
-    // Les plafonds dépendent de la largeur : on repeint au redimensionnement.
+    // Repli mobile : les libellés basculent l'image au lieu de scroller.
+    var fallbacks = stage.querySelectorAll('[data-fallback]');
+    function showFallback(i) {
+      for (var f = 0; f < fallbacks.length; f++) fallbacks[f].hidden = f !== i;
+    }
+
+    // Les libellés amènent au début de leur séquence.
+    for (var s = 0; s < stepBtns.length; s++) {
+      (function (i) {
+        stepBtns[i].addEventListener('click', function () {
+          showFallback(i);
+          for (var b = 0; b < stepBtns.length; b++) {
+            stepBtns[b].classList.toggle('is-active', b === i);
+            stepBtns[b].setAttribute('aria-selected', String(b === i));
+          }
+          if (phraseEl) phraseEl.textContent = SEQUENCES[i].phrase;
+          var span = stage.offsetHeight - window.innerHeight;
+          if (span <= 0) return;   // repli mobile : rien à faire défiler
+          var top = window.scrollY + stage.getBoundingClientRect().top + (i / seqCount) * span;
+          window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+        });
+      })(s);
+    }
+
     window.addEventListener('resize', function () {
-      last = -1;
-      if (!running) paintHero();
+      lastKey = '';
+      stage.style.height = (seqCount * SEQ_H) + 'vh';
+      if (!stageRunning && !reduceMotion) paintStage();
     });
+
+    // Mouvement réduit : pas de frappe, pas de curseur, pas de progression.
+    // Chaque séquence montre directement son état final.
+    if (reduceMotion) {
+      stage.style.height = 'auto';
+      render(SEQUENCES[0], 1);
+      for (var z = 0; z < stepBtns.length; z++) {
+        (function (i) {
+          stepBtns[i].addEventListener('click', function () {
+            render(SEQUENCES[i], 1);
+            for (var b = 0; b < stepBtns.length; b++) {
+              stepBtns[b].classList.toggle('is-active', b === i);
+              stepBtns[b].setAttribute('aria-selected', String(b === i));
+            }
+            if (phraseEl) phraseEl.textContent = SEQUENCES[i].phrase;
+          });
+        })(z);
+      }
+    } else {
+      render(SEQUENCES[0], 0);
+    }
   }
 
   /* -----------------------------------------------------------------

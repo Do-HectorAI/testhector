@@ -54,6 +54,8 @@
   <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m8 12 2.8 2.8L16 9.4"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3 7h12M18 7h3M3 17h5M11 17h10"/><circle cx="16.5" cy="7" r="2"/><circle cx="9.5" cy="17" r="2"/></symbol>
   <symbol id="i-canvas" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/><path d="m10 9-2.5 3L10 15"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h5a2 2 0 0 1 2 2v14a1.5 1.5 0 0 0-1.5-1.5H4z"/><path d="M20 4h-5a2 2 0 0 0-2 2v14a1.5 1.5 0 0 1 1.5-1.5H20z"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 1 9-9c0 2-1.6 2.5-3 2.5h-1.5a2 2 0 0 0-1.4 3.4A1.9 1.9 0 0 1 12 21z"/><circle cx="7.5" cy="12" r="1"/><circle cx="10" cy="8" r="1"/><circle cx="15" cy="8.5" r="1"/></symbol>
   <symbol id="i-pointer" viewBox="0 0 24 24"><path d="M5.5 3.2 19.2 11.6l-6.1 1.2-2.6 5.6z"/></symbol>
   <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
   <!-- Icône PDF (seule couleur tolérée dans la fausse interface, cf. captures) -->
@@ -148,30 +150,364 @@
     </div>
   </section>
 
-  <!-- ===================== Démonstration interactive ===================== -->
-  <section class="section demo" id="demo" aria-labelledby="demo-title">
-    <div class="container">
-      <div class="section-head">
+  <!-- ===================== Démonstration ===================== -->
+  <!-- Écran d'ordinateur fixe : le papier peint est l'image du hero, l'interface
+       Hector est posée dessus. La coque ne bouge jamais ; seul son contenu
+       change, piloté par la position de scroll. Toute la chorégraphie est
+       décrite dans le tableau STAGE_TIMELINE de script.js : on y réordonne,
+       retime ou ajoute une étape sans toucher à la mécanique. -->
+  <section class="stage" id="stage" aria-labelledby="demo-title">
+    <div class="stage-sticky">
+
+      <div class="container stage-head">
         <span class="eyebrow">Interface interactive</span>
         <h2 class="h2" id="demo-title">Prenez la main sur un dossier réel</h2>
-        <p class="lead">Ce n’est pas une vidéo&nbsp;: l’interface ci-dessous est cliquable. Ouvrez un dossier, parcourez ses pièces, lancez une conversation.</p>
+
+        <div class="stage-steps" role="tablist" aria-label="Étapes de la démonstration">
+          <button type="button" class="stage-step is-active" role="tab" id="stage-tab-0"
+                  aria-controls="stage-screen" aria-selected="true" aria-current="step" data-step="0">Rédigez</button>
+          <button type="button" class="stage-step" role="tab" id="stage-tab-1"
+                  aria-controls="stage-screen" aria-selected="false" data-step="1">Organisez</button>
+        </div>
+        <p class="stage-phrase" data-phrase>Du dossier au plan détaillé, argumenté et sourcé.</p>
       </div>
 
-      <!-- Indication de départ : s'efface au premier clic (cf. stopPulse dans script.js). -->
-      <p class="demo-hint" id="demo-hint">
-        <svg class="i" aria-hidden="true"><use href="#i-pointer"/></svg>
-        Cliquez sur la ligne <strong>Techinov</strong> pour ouvrir le dossier
-      </p>
-    </div>
+      <!-- L'écran. Pas de barre de menu, pas de dock, pas de navigateur. -->
+      <div class="desk" id="stage-screen" role="tabpanel" aria-labelledby="stage-tab-0">
+        <img class="desk-paper" src="assets/img/hero-bg-1920.jpg" alt="" aria-hidden="true"
+             width="2816" height="1504" loading="lazy" decoding="async" />
 
-    <div class="app-wrap">
-      <!-- Enregistrement de l'application réelle. Rogné de 248 px en haut pour
-           retirer la barre du navigateur (cf. README, « La vidéo de la démo »). -->
-      <div class="demo-video">
-        <video src="assets/media/demo-hector.mp4" poster="assets/img/demo-poster.jpg"
-               width="1600" height="920"
-               preload="metadata" controls autoplay muted loop playsinline
-               aria-label="Démonstration de l’application Hector"></video>
+        <!-- aria-hidden : la séquence est une illustration animée, elle ne doit
+             pas être annoncée en continu. Le contenu utile est dans les
+             libellés d'étape et leur phrase. -->
+        <div class="app" id="app" data-seq="rediger" aria-hidden="true">
+        <aside class="app-sidebar">
+          <div class="side-top">
+            <img class="side-wordmark" src="assets/img/hector-wordmark.webp" alt="Hector" />
+            <button type="button" class="icon-btn" aria-label="Replier le panneau" tabindex="-1"><svg class="i"><use href="#i-panel"/></svg></button>
+          </div>
+
+          <nav class="side-nav" aria-label="Navigation de l’application">
+            <button type="button" class="side-item is-active" tabindex="-1">
+              <svg class="i"><use href="#i-pencil-square"/></svg><span>Nouvelle conversation</span>
+            </button>
+            <button type="button" class="side-item" tabindex="-1">
+              <svg class="i"><use href="#i-home"/></svg><span>Dossiers</span>
+            </button>
+            <button type="button" class="side-item" tabindex="-1">
+              <svg class="i"><use href="#i-book"/></svg><span>Bibliothèque de modèles</span>
+            </button>
+            <button type="button" class="side-item" tabindex="-1">
+              <svg class="i"><use href="#i-palette"/></svg><span>Personnalisation</span>
+            </button>
+          </nav>
+
+          <p class="side-label">Mes conversations</p>
+
+          <div class="side-search">
+            <button type="button" class="side-item side-item--plain" tabindex="-1">
+              <svg class="i"><use href="#i-search"/></svg><span>Rechercher</span>
+            </button>
+            <button type="button" class="icon-btn" aria-label="Filtrer les conversations" tabindex="-1"><svg class="i"><use href="#i-filter"/></svg></button>
+          </div>
+
+          <div class="side-convs">
+            <div class="side-conv is-active">
+              <div class="side-conv__row"><span class="side-conv__title">Conclusions en défense Tec…</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>Techinov</span>
+            </div>
+            <div class="side-conv">
+              <div class="side-conv__row"><span class="side-conv__title">Synthèse des pièces adverses</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>Techinov</span>
+            </div>
+            <div class="side-conv">
+              <div class="side-conv__row"><span class="side-conv__title">Plan de conclusions Delaunay</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>Delaunay c/ Sofitech</span>
+            </div>
+            <div class="side-conv">
+              <div class="side-conv__row"><span class="side-conv__title">Note de stratégie Ventalis</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>Groupe Ventalis</span>
+            </div>
+            <div class="side-conv">
+              <div class="side-conv__row"><span class="side-conv__title">Acte bailleurs : Clos Fleuri</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub"><svg class="i"><use href="#i-building"/></svg>SCI Le Clos Fleuri</span>
+            </div>
+            <div class="side-conv">
+              <div class="side-conv__row"><span class="side-conv__title">Vue d’ensemble mise en de…</span><svg class="i side-conv__pin"><use href="#i-feather"/></svg></div>
+              <span class="side-conv__sub">Général</span>
+            </div>
+          </div>
+
+          <div class="side-bottom">
+            <button type="button" class="side-item side-item--plain" tabindex="-1"><svg class="i"><use href="#i-help"/></svg><span>Aide</span></button>
+            <button type="button" class="side-item side-item--plain" tabindex="-1"><svg class="i"><use href="#i-sliders"/></svg><span>Paramètres</span></button>
+            <div class="side-user">
+              <span class="side-avatar" aria-hidden="true">C</span>
+              <span class="side-user__text"><strong>Claire VASSEUR</strong><small>Administrateur</small></span>
+            </div>
+          </div>
+        </aside>
+
+          <div class="app-main">
+          <!-- ---------- Vue 1 : conversation (séquence « Rédigez ») ---------- -->
+          <!-- Tous les blocs de la séquence sont présents dès le départ et
+               masqués par data-on : la timeline ne fait que basculer des
+               attributs, elle ne crée jamais de noeud. -->
+          <section class="view view--conversation" data-view="conversation" aria-label="Conversation">
+            <div class="conv">
+
+              <!-- État d'accueil, retiré dès que le fil démarre -->
+              <div class="conv-welcome" data-on="welcome">
+                <img class="ask-wordmark" src="assets/img/hector-wordmark.webp" alt="" />
+                <p class="ask-title">Comment puis-je vous aider&nbsp;?</p>
+                <p class="ask-suggestion">Rédiger une trame d’acte juridique</p>
+                <button type="button" class="ui-btn ui-btn--round ask-picker" tabindex="-1">
+                  <svg class="i"><use href="#i-folder"/></svg>Techinov c/ Logistrans<svg class="i i-chev"><use href="#i-chevron-down"/></svg>
+                </button>
+              </div>
+
+              <!-- Fil de conversation -->
+              <div class="thread" data-on="thread">
+                <p class="bubble bubble--user" data-on="sent">LOGISTRANS nous assigne en paiement de ses trois factures. Prépare les conclusions en défense pour TECHINNOV, avec une demande reconventionnelle au titre de la rétention.</p>
+
+                <p class="bubble bubble--ai" data-on="reply">Je reprends les pièces du dossier Techinov et je construis le plan des conclusions en défense.<br />Recherche de jurisprudence activée.</p>
+
+                <!-- Panneau de progression -->
+                <div class="prog" data-on="prog" role="status" aria-live="off">
+                  <div class="prog-head">
+                    <span class="prog-name"><strong>Recherche juridique</strong> · Conclusions en défense</span>
+                    <span class="prog-pct" data-pct>10&nbsp;%</span>
+                  </div>
+                  <div class="prog-bar"><span class="prog-bar__fill" data-fill></span></div>
+
+                  <ol class="prog-steps">
+                    <li class="prog-step" data-phase="arguments"><span class="prog-dot"></span>Arguments</li>
+                    <li class="prog-step" data-phase="jp"><span class="prog-dot"></span>Recherche JP</li>
+                    <li class="prog-step" data-phase="synthese"><span class="prog-dot"></span>Synthèse</li>
+                    <li class="prog-step" data-phase="insertion"><span class="prog-dot"></span>Insertion</li>
+                  </ol>
+
+                  <p class="prog-line" data-on="working"><span class="spinner" aria-hidden="true"></span>Construction des arguments juridiques en cours…</p>
+
+                  <!-- Arguments : chaque ligne s'allume une à une -->
+                  <div class="prog-block" data-on="args">
+                    <p class="prog-block__title">Arguments juridiques identifiés</p>
+                    <ul class="arg-list">
+                      <li class="arg" data-arg="0">Absence de fondement contractuel des prestations exceptionnelles facturées</li>
+                      <li class="arg" data-arg="1">Défaut de preuve de la réalité des prestations facturées</li>
+                      <li class="arg" data-arg="2">Absence de créance certaine, liquide et exigible</li>
+                      <li class="arg" data-arg="3">Absence de connexité entre la créance invoquée et les marchandises retenues</li>
+                      <li class="arg" data-arg="4">Disproportion manifeste de la rétention, à titre subsidiaire</li>
+                      <li class="arg" data-arg="5">Frais irrépétibles et dépens</li>
+                      <li class="arg arg--pending" data-arg="6">Vérification des fondements</li>
+                    </ul>
+                  </div>
+
+                  <!-- Recherche de jurisprudence : mêmes intitulés, avec compteur -->
+                  <div class="prog-block" data-on="jp">
+                    <p class="prog-block__title">Recherche de JP</p>
+                    <ul class="jp-list">
+                      <li class="jp" data-jp="0" data-count="4"><span class="jp-label">Absence de fondement contractuel des prestations exceptionnelles facturées</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">4&nbsp;JP</span></li>
+                      <li class="jp" data-jp="1" data-count="4"><span class="jp-label">Défaut de preuve de la réalité des prestations facturées</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">4&nbsp;JP</span></li>
+                      <li class="jp" data-jp="2" data-count="4"><span class="jp-label">Absence de créance certaine, liquide et exigible</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">4&nbsp;JP</span></li>
+                      <li class="jp" data-jp="3" data-count="4"><span class="jp-label">Absence de connexité entre la créance invoquée et les marchandises retenues</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">4&nbsp;JP</span></li>
+                      <li class="jp" data-jp="4" data-count="2"><span class="jp-label">Disproportion manifeste de la rétention, à titre subsidiaire</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">2&nbsp;JP</span></li>
+                      <li class="jp" data-jp="5" data-count="0"><span class="jp-label">Frais irrépétibles et dépens</span><span class="jp-state">Recherche en cours…</span><span class="jp-count">0&nbsp;JP</span></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Carte de pièce jointe, une fois le plan produit -->
+                <div class="attach" data-on="attach">
+                  <span class="attach-icon" aria-hidden="true"><svg class="i"><use href="#i-check-circle"/></svg></span>
+                  <span class="attach-text">
+                    <strong>Plan détaillé</strong>
+                    <small>Conclusions en défense · Tribunal des activités économiques de Lyon</small>
+                  </span>
+                  <button type="button" class="ui-btn ui-btn--plain" tabindex="-1">Fermer</button>
+                </div>
+
+                <p class="bubble bubble--ai" data-on="final">Le plan est prêt&nbsp;: deux prétentions principales — le défaut de fondement des factures et l’illégitimité du droit de rétention — puis les demandes accessoires. Si vous le validez, je rédige les conclusions complètes.</p>
+              </div>
+
+              <!-- Composer, toujours en pied -->
+              <div class="composer">
+                <p class="composer-text" data-typed></p>
+                <div class="composer-row">
+                  <button type="button" class="ui-btn ui-btn--round composer-pick" tabindex="-1"><svg class="i"><use href="#i-folder"/></svg>Techinov contre Logistrans<span class="composer-x">×</span></button>
+                  <span class="composer-tools">
+                    <button type="button" class="icon-btn" aria-label="Joindre un fichier" tabindex="-1"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                    <button type="button" class="send" data-send aria-label="Envoyer"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Canvas, ouvert à 100 % -->
+            <aside class="canvas" data-on="canvas" aria-label="Document généré">
+              <div class="canvas-top">
+                <span class="canvas-name"><svg class="i"><use href="#i-canvas"/></svg>Document sans titre · <strong>Plan détaillé</strong></span>
+                <span class="canvas-actions">
+                  <button type="button" class="icon-btn" aria-label="Imprimer" tabindex="-1"><svg class="i"><use href="#i-copy"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Télécharger" tabindex="-1"><svg class="i"><use href="#i-upload"/></svg></button>
+                  <button type="button" class="ui-btn ui-btn--plain" tabindex="-1"><svg class="i"><use href="#i-folder-open"/></svg>Ouvrir</button>
+                </span>
+              </div>
+              <div class="canvas-tools" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="canvas-doc">
+                <p class="canvas-h">PLAN DÉTAILLÉ</p>
+                <p class="canvas-h2">Conclusions en défense</p>
+                <p>Tribunal des activités économiques de Lyon</p>
+                <p class="canvas-h3">I. Sur l’absence de fondement contractuel</p>
+                <p>L’article 6.1 du contrat de prestation logistique arrête limitativement les prestations et leur tarification.</p>
+                <p class="canvas-h3">II. Sur le défaut de preuve des prestations</p>
+                <p>Les factures litigieuses ne sont accompagnées d’aucun bon d’intervention contresigné.</p>
+                <p class="canvas-h3">III. Sur l’illégitimité de la rétention</p>
+                <p>Le droit de rétention suppose une créance certaine, liquide et exigible, et un lien de connexité.</p>
+                <p class="canvas-h3">IV. Sur les demandes accessoires</p>
+                <p>Frais irrépétibles et dépens.</p>
+              </div>
+            </aside>
+          </section>
+
+          <!-- ---------- Vue 2 : liste des dossiers (séquence « Organisez ») ---------- -->
+          <section class="view view--dossiers" data-view="dossiers" aria-label="Dossiers" hidden>
+            <div class="pane">
+              <div class="pane-head">
+                <div>
+                  <h3 class="pane-title">Dossiers</h3>
+                  <p class="pane-sub">Gérez et suivez vos dossiers juridiques</p>
+                </div>
+                <button type="button" class="ui-btn ui-btn--dark" tabindex="-1"><svg class="i"><use href="#i-plus"/></svg>Nouveau dossier</button>
+              </div>
+
+              <div class="pane-tabs">
+                <button type="button" class="tab is-active" tabindex="-1">Dossiers en cours (9)</button>
+                <button type="button" class="tab" tabindex="-1">Dossiers archivés (0)</button>
+              </div>
+
+              <div class="pane-toolbar">
+                <span class="ui-field"><svg class="i"><use href="#i-search"/></svg><span>Rechercher…</span></span>
+                <button type="button" class="ui-btn" tabindex="-1"><svg class="i"><use href="#i-filter"/></svg>Filtrer</button>
+              </div>
+
+              <div class="table" role="table">
+                <div class="table-head" role="row">
+                  <span role="columnheader">Dossier</span>
+                  <span role="columnheader">Procédure</span>
+                  <span role="columnheader">Échéance</span>
+                  <span role="columnheader" class="ctr">Priorité</span>
+                  <span role="columnheader" class="ctr">Partagé à</span>
+                  <span role="columnheader">Créé le</span>
+                  <span role="columnheader"></span>
+                </div>
+                <div class="table-row is-target" id="row-techinov" role="row">
+                  <span role="cell"><strong>Techinov</strong></span>
+                  <span role="cell"><span class="ui-pill"><svg class="i"><use href="#i-scale"/></svg>Droit Commercial</span></span>
+                  <span role="cell">—</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-alert"/></svg></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-users"/></svg></span>
+                  <span role="cell">24/08/2026</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-dots"/></svg></span>
+                </div>
+                <div class="table-row" role="row">
+                  <span role="cell"><strong>Delaunay c/ Sofitech</strong></span>
+                  <span role="cell"><span class="ui-pill"><svg class="i"><use href="#i-scale"/></svg>Droit Commercial</span></span>
+                  <span role="cell">—</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-alert"/></svg></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-users"/></svg></span>
+                  <span role="cell">21/08/2026</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-dots"/></svg></span>
+                </div>
+                <div class="table-row" role="row">
+                  <span role="cell"><strong>Groupe Ventalis</strong></span>
+                  <span role="cell"><span class="ui-pill"><svg class="i"><use href="#i-scale"/></svg>Droit Social</span></span>
+                  <span role="cell">—</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-alert"/></svg></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-users"/></svg></span>
+                  <span role="cell">18/08/2026</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-dots"/></svg></span>
+                </div>
+                <div class="table-row" role="row">
+                  <span role="cell"><strong>SCI Le Clos Fleuri</strong></span>
+                  <span role="cell"><span class="ui-pill"><svg class="i"><use href="#i-scale"/></svg>Baux commerciaux</span></span>
+                  <span role="cell">—</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-alert"/></svg></span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-users"/></svg></span>
+                  <span role="cell">12/08/2026</span>
+                  <span role="cell" class="ctr"><svg class="i i-muted"><use href="#i-dots"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---------- Vue 3 : détail du dossier ---------- -->
+          <section class="view view--dossier" data-view="dossier" aria-label="Dossier Techinov" hidden>
+            <div class="pane">
+              <div class="pane-topbar">
+                <span class="crumb">Dossiers / <strong>Techinov</strong></span>
+                <span class="meta">
+                  <span class="meta-item"><em>Client</em><strong>Techinov</strong></span>
+                  <span class="meta-item"><em>Procédure</em><strong>Droit Commercial</strong></span>
+                  <span class="meta-item"><em>Statut</em><svg class="i i-muted"><use href="#i-info"/></svg><strong>En cours</strong></span>
+                  <button type="button" class="meta-btn" tabindex="-1"><svg class="i"><use href="#i-pencil"/></svg>Modifier</button>
+                  <button type="button" class="icon-btn" aria-label="Plus d’actions" tabindex="-1"><svg class="i"><use href="#i-dots"/></svg></button>
+                </span>
+              </div>
+
+              <div class="pane-row">
+                <span class="segs">
+                  <button type="button" class="seg is-active" tabindex="-1"><svg class="i"><use href="#i-folder-open"/></svg>Gestion des pièces</button>
+                  <button type="button" class="seg" tabindex="-1"><svg class="i"><use href="#i-grid"/></svg>Analyse avancée</button>
+                </span>
+                <button type="button" class="ui-btn" tabindex="-1"><svg class="i"><use href="#i-wand"/></svg>Demander à Hector</button>
+              </div>
+
+              <div class="pane-tabs pane-tabs--doc">
+                <button type="button" class="tab is-active" tabindex="-1">Nos pièces</button>
+                <button type="button" class="tab" tabindex="-1">Procédure</button>
+                <button type="button" class="tab" tabindex="-1">Notes client</button>
+                <button type="button" class="tab" tabindex="-1">Mes écritures</button>
+                <button type="button" class="tab" tabindex="-1">Partie adverse</button>
+                <button type="button" class="tab" tabindex="-1">Mes recherches juridiques</button>
+                <button type="button" class="tab" tabindex="-1">Chronologie</button>
+              </div>
+
+              <div class="pane-toolbar">
+                <span class="ui-field"><svg class="i"><use href="#i-search"/></svg><span>Rechercher…</span></span>
+                <button type="button" class="ui-btn ui-btn--plain" tabindex="-1"><svg class="i"><use href="#i-hash"/></svg>Numéroter mes pièces<svg class="i i-chev"><use href="#i-chevron-down"/></svg></button>
+                <button type="button" class="ui-btn ui-btn--plain" tabindex="-1"><svg class="i"><use href="#i-copy"/></svg>Tamponner mes pièces</button>
+                <button type="button" class="ui-btn ui-btn--plain" tabindex="-1"><svg class="i"><use href="#i-folder-plus"/></svg>Nouveau dossier</button>
+                <button type="button" class="ui-btn ui-btn--dark" tabindex="-1"><svg class="i"><use href="#i-upload"/></svg>Ajouter des pièces</button>
+              </div>
+
+              <p class="pane-note">Les pièces que vous versez au débat pour votre client, celles qui figureront au bordereau de communication.</p>
+
+              <div class="files-bar">
+                <span><strong>Fichiers</strong> · Sélectionner tous les fichiers</span>
+                <span class="files-bar__right"><svg class="i"><use href="#i-sort"/></svg>Trier par <strong>N° pièce</strong> <svg class="i"><use href="#i-arrow-up"/></svg></span>
+              </div>
+
+              <div class="pieces" id="pieces"><!-- injecté par script.js --></div>
+            </div>
+          </section>
+          </div>
+        </div>
+
+        <span class="sim-cursor" id="sim-cursor" aria-hidden="true"></span>
+      </div>
+
+      <!-- Repli mobile : l'interface est illisible sous 900 px. Une image fixe
+           par séquence prend le relais, les libellés restent utilisables. -->
+      <div class="stage-fallback" id="stage-fallback">
+        <img src="assets/img/demo/rediger.jpg" data-fallback="0"
+             alt="Hector construit le plan des conclusions en défense, avec sa recherche de jurisprudence"
+             width="1200" height="666" loading="lazy" decoding="async" />
+        <img src="assets/img/demo/organiser.jpg" data-fallback="1" hidden
+             alt="Liste des dossiers du cabinet dans Hector"
+             width="1200" height="666" loading="lazy" decoding="async" />
       </div>
     </div>
   </section>

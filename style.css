@@ -316,41 +316,203 @@ h1, h2, h3, h4 {
 
 .app-wrap { max-width: 74rem; margin-inline: auto; padding-inline: 1.5rem; }
 
-/* Cadre de la vidéo de démonstration : reprend le rayon, le filet et l'ombre
-   qui donnaient à la fausse interface son allure de fenêtre posée. */
-.demo-video {
-  overflow: hidden; border-radius: 14px;
-  border: 1px solid var(--g-200); background: var(--g-100);
-  box-shadow: 0 30px 70px -28px rgba(0,0,0,.45);
+/* --- Section « Démonstration » : écran fixe, contenu piloté au scroll ---
+   Réglages de la chorégraphie : --stage-seq-h est la hauteur de piste allouée
+   à chaque séquence, --stage-run la part de cette piste où la scène se joue,
+   le reste servant de palier où l'état final reste lisible. */
+.stage {
+  --stage-seq-h: 130;
+  --stage-run: .78;
+  position: relative;
+  background: var(--g-50);
+  border-bottom: 1px solid var(--g-200);
 }
-.demo-video video { display: block; width: 100%; height: auto; }
-
-/* --- Section « Démonstration interactive » ---
-   La démonstration a quitté le hero : tout ce qui l'entoure est repassé
-   du blanc-sur-sombre au sombre-sur-clair. */
-.demo { background: var(--g-50); border-bottom: 1px solid var(--g-200); }
-
-/* Indication de départ. Le curseur bat doucement pour signaler qu'il y a
-   quelque chose à cliquer ; l'ensemble s'efface au premier clic. */
-.demo-hint {
-  display: inline-flex; align-items: center; gap: .55rem;
-  margin: -1rem auto clamp(1.5rem, 3vw, 2.25rem);
-  padding: .55rem 1.1rem; border-radius: 999px;
-  border: 1px solid var(--g-300); background: var(--white);
-  font-size: .9375rem; color: var(--g-700);
-  transition: opacity .4s;
+.stage-sticky {
+  position: sticky; top: 0;
+  height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: calc(var(--header-h) + 1.25rem) 1.5rem 1.5rem;
+  overflow: hidden;
 }
-.demo .container { display: flex; flex-direction: column; align-items: center; }
-.demo .section-head { width: 100%; }
-.demo-hint strong { color: var(--ink); }
-.demo-hint .i { font-size: 1.05rem; color: var(--ink); fill: currentColor; stroke-width: 1.2; }
-.demo-hint.is-hidden { opacity: 0; }
+.stage-head { text-align: center; flex: none; }
+.stage-head .h2 { margin: .5rem 0 1.25rem; }
 
-@keyframes demo-pointer {
-  0%, 70%, 100% { transform: translate(0, 0); }
-  80%           { transform: translate(2px, 2px); }
+/* Libellés d'étape : vrais boutons, mêmes pastilles que les onglets
+   de la section Fonctionnalités. */
+.stage-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem; }
+.stage-step {
+  padding: .6rem 1.15rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--g-200); background: var(--white); color: var(--g-700);
+  font-size: .9375rem; font-weight: 700; white-space: nowrap;
+  transition: border-color .25s, background-color .25s, color .25s;
 }
-.demo-hint .i { animation: demo-pointer 2.4s ease-in-out infinite; }
+.stage-step:hover { border-color: var(--g-400); color: var(--ink); }
+.stage-step.is-active { background: var(--black); border-color: var(--black); color: var(--white); }
+.stage-phrase {
+  margin: .875rem 0 0; color: var(--g-700);
+  font-size: clamp(.9375rem, 1.5vw, 1.125rem);
+  transition: opacity .3s;
+}
+.stage-phrase.is-swapping { opacity: 0; }
+
+/* --- L'écran : papier peint + interface posée dessus.
+   Pas de barre de menu, pas de dock, pas de navigateur. --- */
+.desk {
+  position: relative; flex: 1; min-height: 0;
+  width: 100%; max-width: 78rem; margin-top: clamp(1rem, 2.5vw, 1.75rem);
+  border-radius: 18px; overflow: hidden; background: var(--g-200);
+  box-shadow: 0 40px 90px -40px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.10);
+}
+.desk-paper { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+.desk .app {
+  position: absolute; inset: clamp(.5rem, 1.2vw, 1rem);
+  height: auto; zoom: 1; border-radius: 12px;
+  font-size: .9375rem;
+  box-shadow: 0 18px 40px -22px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.06);
+}
+
+/* Curseur simulé : un seul élément, animé en transform uniquement. */
+.sim-cursor {
+  position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none;
+  width: 18px; height: 18px; opacity: 0;
+  background: no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 3.2 19.2 11.6l-6.1 1.2-2.6 5.6z' fill='%23111' stroke='%23fff' stroke-width='1.4'/%3E%3C/svg%3E");
+  transition: transform .7s cubic-bezier(.22,.61,.36,1), opacity .25s;
+  will-change: transform;
+}
+.sim-cursor.is-on { opacity: 1; }
+
+/* --- Vues : même comportement que .screen --- */
+.view { height: 100%; }
+.view[hidden] { display: none; }
+
+/* --- Apparition des blocs de la séquence ---
+   Un bloc éteint sort du flux ; allumé, il entre en opacité et translation.
+   Le basculement n'a lieu qu'au passage d'une étape, jamais par image. */
+[data-on] { display: none; }
+[data-on].is-on { display: block; animation: step-in .45s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes step-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* --- Conversation --- */
+.desk .app-sidebar { width: 12.25rem; }
+
+.view--conversation { display: flex; gap: .5rem; height: 100%; }
+/* Plancher de largeur : sans lui, l'ouverture du canvas écrase la
+   conversation au point de casser le texte mot à mot. */
+.conv { flex: 1 1 56%; min-width: 20rem; display: flex; flex-direction: column; }
+.conv-welcome { margin: auto; text-align: center; padding-bottom: 2rem; }
+.thread { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: .25rem .5rem 1rem 0; scrollbar-width: thin; }
+.thread[data-on].is-on { display: flex; flex-direction: column; gap: .75rem; }
+
+.bubble { margin: 0; font-size: .8125rem; line-height: 1.55; max-width: 88%; }
+.bubble--user { align-self: flex-end; background: var(--g-100); border-radius: 12px; padding: .625rem .875rem; }
+.bubble--ai { align-self: stretch; color: var(--g-900); }
+
+/* --- Panneau de progression --- */
+.prog { border: 1px solid var(--g-200); border-radius: 12px; padding: .875rem 1rem; background: var(--white); }
+.prog-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.prog-name { font-size: .8125rem; color: var(--g-700); }
+.prog-name strong { color: var(--ink); }
+.prog-pct { font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.prog-bar { height: 3px; margin: .5rem 0 .875rem; background: var(--g-200); border-radius: 999px; overflow: hidden; }
+.prog-bar__fill {
+  display: block; height: 100%; width: 100%; background: var(--ink);
+  transform-origin: left center; transform: scaleX(0); transition: transform .4s linear;
+}
+.prog-steps { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin: 0 0 .75rem; padding: 0; list-style: none; }
+.prog-step {
+  display: inline-flex; align-items: center; gap: .375rem;
+  padding: .25rem .625rem; border-radius: 999px;
+  border: 1px solid var(--g-200); background: var(--g-50);
+  font-size: .6875rem; font-weight: 700; color: var(--g-500);
+}
+.prog-step + .prog-step::before { content: ''; width: .75rem; height: 1px; background: var(--g-300); margin-left: -.75rem; margin-right: .375rem; }
+.prog-dot { width: .375rem; height: .375rem; border-radius: 999px; background: currentColor; }
+.prog-step.is-active { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.prog-step.is-done { background: var(--white); border-color: var(--g-300); color: var(--g-700); }
+.prog-line { display: flex; align-items: center; gap: .5rem; margin: 0 0 .5rem; font-size: .78125rem; color: var(--g-700); }
+.prog-block { margin-top: .75rem; }
+.prog-block__title { margin: 0 0 .5rem; font-size: .78125rem; font-weight: 700; }
+
+/* Arguments : une coche apparaît ligne à ligne */
+.arg-list, .jp-list { margin: 0; padding: 0; list-style: none; display: grid; gap: .3125rem; }
+.arg, .jp { font-size: .75rem; line-height: 1.45; color: var(--g-700); opacity: .25; transition: opacity .3s; }
+.arg { position: relative; padding-left: 1.125rem; }
+.arg::before { content: '○'; position: absolute; left: 0; color: var(--g-400); }
+.arg.is-on { opacity: 1; }
+.arg.is-on::before { content: '✓'; color: var(--ink); }
+.arg--pending.is-on::before { content: '◔'; color: var(--g-500); }
+
+/* Recherche de JP : état et compteur à droite */
+.jp {
+  display: grid; grid-template-columns: minmax(0,1fr) auto;
+  grid-template-areas: 'label count' 'state count';
+  column-gap: 1rem; align-items: center; padding-left: 1.125rem; position: relative;
+}
+.jp::before { content: '○'; position: absolute; left: 0; top: 0; color: var(--g-400); }
+.jp-label { grid-area: label; }
+.jp-state { grid-area: state; font-size: .6875rem; color: var(--g-500); }
+.jp-count { grid-area: count; font-size: .6875rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--g-600); opacity: 0; transition: opacity .3s; }
+.jp.is-searching, .jp.is-done { opacity: 1; }
+.jp.is-done::before { content: '✓'; color: var(--ink); }
+.jp.is-done .jp-count { opacity: 1; }
+
+.spinner {
+  width: .75rem; height: .75rem; flex: none; border-radius: 999px;
+  border: 1.5px solid var(--g-300); border-top-color: var(--ink);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- Carte de pièce jointe --- */
+.attach { display: flex; align-items: center; gap: .75rem; border: 1px solid var(--g-200); border-radius: 12px; padding: .625rem .75rem; background: var(--white); }
+.attach[data-on].is-on { display: flex; }
+.attach-icon { display: grid; place-items: center; color: var(--ink); font-size: 1rem; }
+.attach-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.attach-text strong { font-size: .78125rem; }
+.attach-text small { font-size: .6875rem; color: var(--g-600); }
+
+/* --- Composer --- */
+.conv .composer { flex: none; margin-top: .5rem; }
+.composer-text { margin: 0 0 .75rem; min-height: 1.2em; font-size: .8125rem; line-height: 1.5; color: var(--ink); }
+.composer-text:empty::before { content: 'Décrivez ce que vous voulez faire…'; color: var(--g-500); }
+.composer-text::after { content: ''; display: inline-block; width: 1px; height: 1em; margin-left: 1px; vertical-align: text-bottom; background: var(--ink); opacity: 0; }
+.composer-text.is-typing::after { opacity: 1; animation: caret .9s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.composer-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.composer-tools { display: inline-flex; align-items: center; gap: .375rem; }
+.composer-x { margin-left: .375rem; color: var(--g-500); }
+.send { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border: 0; border-radius: 999px; background: var(--ink); color: var(--white); cursor: pointer; transition: transform .18s; }
+.send.is-press { transform: scale(.86); }
+
+/* --- Canvas, ouvert depuis la droite --- */
+.canvas { flex: none; width: 0; opacity: 0; overflow: hidden; border-left: 1px solid var(--g-200); background: var(--white); flex-direction: column; transition: width .5s cubic-bezier(.22,.61,.36,1), opacity .4s; }
+.canvas[data-on].is-on { display: flex; width: 40%; min-width: 15rem; opacity: 1; animation: none; }
+.canvas-top { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .625rem .75rem; border-bottom: 1px solid var(--g-200); }
+.canvas-name { display: inline-flex; align-items: center; gap: .375rem; font-size: .71875rem; color: var(--g-600); }
+.canvas-actions { display: inline-flex; align-items: center; gap: .25rem; }
+.canvas-tools { display: flex; gap: .5rem; padding: .5rem .75rem; border-bottom: 1px solid var(--g-150); }
+.canvas-tools span { width: .875rem; height: .875rem; border-radius: 3px; background: var(--g-150); }
+.canvas-doc { flex: 1; min-height: 0; overflow-y: auto; padding: 1rem 1.25rem; font-size: .71875rem; line-height: 1.6; color: var(--g-700); }
+.canvas-doc p { margin: 0 0 .625rem; }
+.canvas-h { font-weight: 700; letter-spacing: .12em; font-size: .625rem; color: var(--g-600); }
+.canvas-h2 { font-family: var(--font-heading); font-size: .9375rem; color: var(--ink); }
+.canvas-h3 { font-weight: 700; color: var(--ink); margin-top: .875rem; }
+
+/* --- Compléments des vues Dossiers --- */
+.pane-tabs { display: flex; gap: 1.25rem; margin-top: .875rem; border-bottom: 1px solid var(--g-200); }
+.pane-tabs--doc { gap: 1rem; overflow-x: auto; }
+.tab { border: 0; background: none; cursor: pointer; white-space: nowrap; padding: 0 0 .5rem; font-size: .78125rem; font-weight: 500; color: var(--g-600); border-bottom: 2px solid transparent; }
+.tab.is-active { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+.pane-note { margin: .75rem 0 0; font-size: .71875rem; color: var(--g-600); }
+.ui-field { display: inline-flex; align-items: center; gap: .5rem; flex: 1; padding: .4375rem .625rem; border: 1px solid var(--g-200); border-radius: 8px; font-size: .78125rem; color: var(--g-500); background: var(--white); }
+.crumb { font-size: .8125rem; color: var(--g-600); }
+.crumb strong { color: var(--ink); }
+.segs { display: inline-flex; gap: .25rem; padding: .1875rem; background: var(--g-100); border-radius: 10px; }
+
+/* --- Repli mobile : images fixes et libellés (cf. section 11) --- */
+.stage-fallback { display: none; }
+.stage-fallback img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--g-200); }
 
 /* Navigation simplifiée, mobile uniquement */
 .app-mobile-nav { display: none; gap: .375rem; margin-bottom: .875rem; }
@@ -970,7 +1132,12 @@ h1, h2, h3, h4 {
 
   /* Fausse interface : la barre latérale disparaît, navigation simplifiée */
   .header-logo img { height: 1.6rem; }
-  .demo-hint { font-size: .875rem; padding: .5rem .9rem; }
+  /* Repli mobile : l'interface est illisible à cette taille. On la remplace
+     par une image fixe par séquence ; les libellés restent utilisables. */
+  .stage { height: auto !important; }
+  .stage-sticky { position: static; height: auto; padding-block: clamp(4.5rem, 8vw, 7rem); }
+  .desk, .sim-cursor { display: none; }
+  .stage-fallback { display: block; width: 100%; max-width: 34rem; margin: clamp(1.25rem, 4vw, 2rem) auto 0; }
   .app-sidebar { display: none; }
   .app-mobile-nav { display: flex; }
   .app-main { padding: .5rem; }
@@ -1025,7 +1192,18 @@ h1, h2, h3, h4 {
     transition-duration: .001ms !important;
   }
   .marquee-track { animation: none; }
-  .demo-hint .i { animation: none; }
+  /* Scène : aucune frappe, aucun curseur, aucune progression animée.
+     Chaque séquence affiche directement son état final ; les libellés
+     d'étape restent cliquables. */
+  .stage { height: auto !important; }
+  .stage-sticky { position: static; height: auto; padding-block: clamp(4.5rem, 8vw, 7rem); }
+  .sim-cursor { display: none !important; }
+  .prog-bar__fill { transition: none; }
+  .spinner { animation: none; border-top-color: var(--g-300); }
+  .composer-text.is-typing::after { animation: none; opacity: 0; }
+  .canvas { transition: none; }
+  [data-on].is-on { animation: none; }
+  .arg, .jp { opacity: 1; }
   /* Hero : plein écran figé, aucun effet lié au scroll. */
   .hero-media, .hero-marquee { clip-path: none !important; will-change: auto; }
   /* Apparitions : tout est visible d'emblée. */

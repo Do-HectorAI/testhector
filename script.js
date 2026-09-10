@@ -298,6 +298,8 @@
     var lastKey = '';
     var stageRunning = false;
     var activeSeq = -1;
+    var SEQ0_MS = 18000;   // durée de la séquence « Rédigez », en millisecondes
+    var seq0Start = 0;     // remis à zéro à chaque sortie de la scène
 
     function paintStage() {
       var span = stage.offsetHeight - window.innerHeight;
@@ -306,10 +308,22 @@
 
       var raw = g * seqCount;
       var idx = Math.min(seqCount - 1, Math.floor(raw));
-      var local = Math.min(1, (raw - idx) / RUN);   // le reste de la séquence est un palier
+
+      // Séquence 1 : elle se joue seule, sur son horloge, dès que la scène
+      // entre à l'écran. Le scroll ne la pilote pas — il ne sert qu'à passer
+      // à la séquence suivante, une fois celle-ci terminée.
+      // Séquence 2 : pilotée au scroll, comme prévu.
+      var local;
+      if (idx === 0) {
+        if (!seq0Start) seq0Start = performance.now();
+        local = Math.min(1, (performance.now() - seq0Start) / SEQ0_MS);
+      } else {
+        seq0Start = 0;                      // rejouable si l'on remonte
+        local = Math.min(1, (raw - idx) / RUN);
+      }
 
       // Signature : on ne repeint que si l'image change vraiment.
-      var key = idx + ':' + Math.round(local * 400);
+      var key = idx + ':' + Math.round(local * 600);
       if (key !== lastKey) {
         lastKey = key;
         render(SEQUENCES[idx], local);
@@ -343,6 +357,8 @@
           requestAnimationFrame(paintStage);
         } else if (!vis) {
           stageRunning = false;
+          seq0Start = 0;      // la séquence se rejoue proprement au retour
+          lastKey = '';
         }
       }, { threshold: 0 }).observe(stage);
     } else if (!reduceMotion) {
